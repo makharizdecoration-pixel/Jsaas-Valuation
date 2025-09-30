@@ -1,0 +1,95 @@
+/* 1) أوامر Tailwind لازم تيجي أول شيء */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2) تخصيصات base لازم بعد @tailwind base */
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+  }
+
+  * {
+    border-color: var(--color-border, transparent);
+    cursor: none;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    cursor: pointer;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* 3) الاستيرادات الأخرى */
+@import "tw-animate-css";
+
+/* 4) تعريفات الخطوط */
+@font-face {
+  font-family: "Almarai-Bold";
+  src: url("/fonts/Almarai-Bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Almarai-Regular";
+  src: url("/fonts/Almarai-Regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 5) Custom animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px var(--color-accent);
+  }
+  50% {
+    box-shadow: 0 0 40px var(--color-accent);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse-glow {
+    animation: none;
+  }
+}
+
+/* 6) Custom utility classes for bilingual support */
+.font-almarai-bold {
+  font-family: "Almarai-Bold";
+}
+
+.font-almarai-regular {
+  font-family: "Almarai-Regular";
+}
