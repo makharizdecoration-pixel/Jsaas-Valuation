@@ -35,7 +35,7 @@ export default function MouseTracker() {
   return (
     <>
       <div
-        className="fixed top-0 left-0 w-4 h-4 bg-[#fdbb02] rounded-full pointer-events-none z-50 transition-opacity duration-200"
+        className="fixed top-0 left-0 w-4 h-4 bg-jassas-accent-red rounded-full pointer-events-none z-50 transition-opacity duration-200"
         style={{
           transform: `translate3d(${mousePosition.x - 8}px, ${mousePosition.y - 8}px, 0)`,
           opacity: isVisible ? 1 : 0,
@@ -43,7 +43,7 @@ export default function MouseTracker() {
       />
 
       <div
-        className="fixed top-0 left-0 w-6 h-6 border border-[#fdbb02]/60 rounded-full pointer-events-none z-40 transition-all duration-300"
+        className="fixed top-0 left-0 w-6 h-6 border border-jassas-accent-red/60 rounded-full pointer-events-none z-40 transition-all duration-300"
         style={{
           transform: `translate3d(${mousePosition.x - 12}px, ${mousePosition.y - 12}px, 0)`,
           opacity: isVisible ? 0.6 : 0,
