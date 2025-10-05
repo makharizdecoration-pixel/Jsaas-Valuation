@@ -17,7 +17,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Makharez Decoration",
+  title: "Jasas Group",
   description: "High-end furniture and decor manufacturer",
 };
 
