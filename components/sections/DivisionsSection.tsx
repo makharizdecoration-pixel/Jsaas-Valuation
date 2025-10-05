@@ -204,9 +204,6 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   >
                     {activeDivision.title}
                   </h3>
-                  <p className={`text-text-secondary mb-6 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
-                    {isRTL ? "قسم من أقسامنا" : "A Division of Ours"}
-                  </p>
                   <motion.p className={`text-text-secondary leading-relaxed text-lg ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
                     {extractTextContent(activeDivision.content).split(" ").map((word, i) => (
                       <motion.span
