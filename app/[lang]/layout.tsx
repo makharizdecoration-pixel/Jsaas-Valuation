@@ -1,7 +1,10 @@
+// app/[lang]/layout.tsx
+
 import type { Metadata } from "next";
 import { Poppins, Almarai } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"; 
+// تم تصحيح المسار هنا
+import { ThemeProvider } from "next-themes"; 
 import ClientLayout from "./ClientLayout";
 
 const almarai = Almarai({
@@ -23,11 +26,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
-}>) {
+  params: { lang: 'ar' | 'en' };
+}) {
   return (
-    <html lang="ar" dir="rtl" className={`${almarai.variable} ${poppins.variable}`} suppressHydrationWarning>
+    <html lang={params.lang} dir={params.lang === 'ar' ? 'rtl' : 'ltr'} className={`${almarai.variable} ${poppins.variable}`} suppressHydrationWarning>
       <body>
         <ThemeProvider
           attribute="class"
