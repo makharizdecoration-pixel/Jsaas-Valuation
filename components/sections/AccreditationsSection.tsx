@@ -25,17 +25,28 @@ export const AccreditationsSection: React.FC<AccreditationsSectionProps> = ({ ti
     return null; 
   }
 
+  // تقسيم النص لفقرات منفصلة
+  const formatSubtitle = (htmlContent: string | undefined): string => {
+    if (!htmlContent) return '';
+    // تقسيم النص عند كل نقطة + مسافة وإضافة <p> tags
+    return htmlContent
+      .split(/\.\s+/)
+      .filter(text => text.trim())
+      .map(text => `<p class="mb-4">${text.trim()}.</p>`)
+      .join('');
+  };
+
   // نقوم بالتكرار اليدوي لضمان عمل الحلقة بسلاسة في كلتا اللغتين
   const displayLogos = [...logos, ...logos];
 
   return (
     <section id="accreditations" className="py-20 bg-background">
-      <div className="container mx-auto text-center mb-12">
-        <h2 className="text-4xl font-bold text-text-primary">{title}</h2>
+      <div className="container mx-auto text-center mb-12 px-4">
+        <h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-6">{title}</h2>
         {subtitle && (
             <div 
-                className="text-lg text-text-secondary mt-3 max-w-2xl mx-auto"
-                dangerouslySetInnerHTML={{ __html: subtitle }} 
+                className="text-lg text-text-secondary leading-relaxed max-w-6xl mx-auto"
+                dangerouslySetInnerHTML={{ __html: formatSubtitle(subtitle) }} 
             />
         )}
       </div>
