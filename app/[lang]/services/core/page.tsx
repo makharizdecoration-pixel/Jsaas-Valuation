@@ -4,7 +4,7 @@ import { InteractiveServiceViewer } from "@/components/sections/InteractiveServi
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-// --- واجهات البيانات ---
+// --- واجهات البيانات (تم تحديثها) ---
 interface ImageNode { sourceUrl: string; altText: string; }
 interface SiteOptions { footerTitle: string; footerDescription: string; footerLogo: { node: ImageNode }; }
 interface SiteOptionsFields { logo: { node: ImageNode }; }
@@ -12,16 +12,15 @@ interface SubService { subServiceTitle: string; subServiceDescription: string; s
 interface ContactInfo { emailAddress: string; phoneNumber: string; unifiedNumber: string; }
 interface CoreServicesData { nodes: { title: string; coreServiceDetails: Omit<SubService, 'subServiceTitle'> & { subServiceTitle?: string }; }[]; }
 interface PageNodeForOptions { siteOptions: SiteOptions; siteOptionsFields: SiteOptionsFields; contactInfo: ContactInfo; }
-interface MainServiceData {
-    title: string;
-    serviceDetails: {
-        serviceDescription: string;
-    };
+// واجهة جديدة لبيانات الفئة الرئيسية
+interface MainCategoryData {
+    name: string;
+    description: string;
 }
 interface PageData { 
     coreServices: CoreServicesData; 
-    service: MainServiceData;
-    page: PageNodeForOptions;
+    serviceGroups: { nodes: [MainCategoryData] }; // بيانات الفئة الرئيسية
+    page: PageNodeForOptions; // بيانات الهيدر والفوتر
 }
 
 // بيانات القوائم الثابتة
@@ -30,22 +29,25 @@ const staticNavItems = {
   en: [{ label: "CEO", href: "/#ceo" }, { label: "About Us", href: "/#about" }, { label: "Services", href: "/#services" }, { label: "Divisions", href: "/#divisions" }, { label: "Why Us", href: "/#whyus" }, { label: "Equipment", href: "/#equipment" }, { label: "Quality Policy", href: "/#quality" }, { label: "Portfolio", href: "/#portfolio" }, { label: "Contact Us", href: "/#contact" }]
 };
 
-// دالة جلب البيانات
-async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string, serviceUri: string): Promise<PageData> {
+// دالة جلب البيانات المحدثة
+async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string, categorySlug: string): Promise<PageData> {
     const response = await fetch(process.env.WORDPRESS_API_URL!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         body: JSON.stringify({
             query: `
-                query GetCoreServicesPageData($language: LanguageCodeFilterEnum!, $homepageId: ID!, $serviceUri: ID!) {
-                    service(id: $serviceUri, idType: URI) {
-                        title(format: RENDERED)
-                        serviceDetails {
-                            serviceDescription
+                query GetCoreServicesPageData($language: LanguageCodeEnum!, $homepageId: ID!, $categorySlug: [String]) {
+                    # جلب بيانات الفئة (العنوان والوصف) من الـ Taxonomy
+                    serviceGroups(where: { slug: $categorySlug, language: $language }) {
+                        nodes {
+                            name
+                            description
                         }
                     }
-                    coreServices(where: { language: $language }) {
+                    
+                    # جلب قائمة الخدمات الفرعية المرتبطة بهذه الفئة فقط
+                    coreServices(where: { taxQuery: { taxArray: [{ taxonomy: SERVICEGROUP, field: SLUG, terms: $categorySlug }] } }) {
                         nodes {
                             title(format: RENDERED)
                             coreServiceDetails { 
@@ -55,6 +57,8 @@ async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string
                             }
                         }
                     }
+
+                    # جلب بيانات الهيدر والفوتر
                     page(id: $homepageId, idType: DATABASE_ID) {
                         siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
                         siteOptionsFields { logo { node { sourceUrl altText } } }
@@ -62,11 +66,14 @@ async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string
                     }
                 }
             `,
-            variables: { language, homepageId, serviceUri }
+            variables: { language: language === 'AR' ? 'AR' : 'EN', homepageId, categorySlug }
         })
     });
     const json = await response.json();
-    if (json.errors) { throw new Error("Failed to fetch data from WordPress."); }
+    if (json.errors) {
+        console.error("GraphQL Errors:", json.errors);
+        throw new Error("Failed to fetch data from WordPress.");
+    }
     return json.data;
 }
 
@@ -76,16 +83,17 @@ export default async function CoreServicesPage({ params }: { params: { lang: 'ar
     const isRTL = lang === 'ar';
     const langCode = isRTL ? 'AR' : 'EN';
     const homepageId = isRTL ? "87" : "64";
-    // <<< تم وضع الـ slugs الصحيحة هنا >>>
-    const serviceUri = isRTL ? "الخدمات-الأساسية" : "core-services"; 
+    // الـ Slug الخاص بالفئة التي أنشأتها
+    const categorySlug = isRTL ? "الخدمات-الأساسية" : "core-services"; 
     
-    const data = await getCoreServicesPageData(langCode, homepageId, serviceUri);
+    const data = await getCoreServicesPageData(langCode, homepageId, categorySlug);
 
-    if (!data || !data.coreServices || !data.service || !data.page) {
-        return <div className="min-h-screen flex items-center justify-center">Failed to load services data for language: {lang}. Check if slugs are correct.</div>;
+    if (!data || !data.coreServices || !data.serviceGroups?.nodes.length || !data.page) {
+        return <div className="min-h-screen flex items-center justify-center">Failed to load services data for: {categorySlug}.</div>;
     }
     
-    const pageInfo = data.service;
+    // استخدام المصدر الصحيح للبيانات
+    const pageInfo = data.serviceGroups.nodes[0];
     const subServices = data.coreServices.nodes.map(node => ({
         title: node.coreServiceDetails.subServiceTitle || node.title,
         subServiceDescription: node.coreServiceDetails.subServiceDescription,
@@ -107,12 +115,12 @@ export default async function CoreServicesPage({ params }: { params: { lang: 'ar
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h1 className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
-                            {pageInfo.title}
+                            {pageInfo.name}
                         </h1>
-                        {pageInfo.serviceDetails?.serviceDescription && (
+                        {pageInfo.description && (
                             <div
                                 className={`max-w-3xl mx-auto text-lg leading-relaxed text-text-secondary prose dark:prose-invert ${isRTL ? "font-almarai-regular" : "font-normal"}`}
-                                dangerouslySetInnerHTML={{ __html: pageInfo.serviceDetails.serviceDescription }}
+                                dangerouslySetInnerHTML={{ __html: pageInfo.description }}
                             />
                         )}
                     </div>
