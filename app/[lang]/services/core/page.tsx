@@ -4,7 +4,7 @@ import { InteractiveServiceViewer } from "@/components/sections/InteractiveServi
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-// --- واجهات البيانات (تم تحديثها) ---
+// --- واجهات البيانات ---
 interface ImageNode { sourceUrl: string; altText: string; }
 interface SiteOptions { footerTitle: string; footerDescription: string; footerLogo: { node: ImageNode }; }
 interface SiteOptionsFields { logo: { node: ImageNode }; }
@@ -12,15 +12,16 @@ interface SubService { subServiceTitle: string; subServiceDescription: string; s
 interface ContactInfo { emailAddress: string; phoneNumber: string; unifiedNumber: string; }
 interface CoreServicesData { nodes: { title: string; coreServiceDetails: Omit<SubService, 'subServiceTitle'> & { subServiceTitle?: string }; }[]; }
 interface PageNodeForOptions { siteOptions: SiteOptions; siteOptionsFields: SiteOptionsFields; contactInfo: ContactInfo; }
-// واجهة جديدة لبيانات الفئة الرئيسية
 interface MainCategoryData {
     name: string;
-    description: string;
+    serviceGroupFields: { // اسم مجموعة الحقول من ACF
+        categoryDescription: string;
+    };
 }
 interface PageData { 
     coreServices: CoreServicesData; 
-    serviceGroups: { nodes: [MainCategoryData] }; // بيانات الفئة الرئيسية
-    page: PageNodeForOptions; // بيانات الهيدر والفوتر
+    serviceGroups: { nodes: [MainCategoryData] };
+    page: PageNodeForOptions;
 }
 
 // بيانات القوائم الثابتة
@@ -29,25 +30,25 @@ const staticNavItems = {
   en: [{ label: "CEO", href: "/#ceo" }, { label: "About Us", href: "/#about" }, { label: "Services", href: "/#services" }, { label: "Divisions", href: "/#divisions" }, { label: "Why Us", href: "/#whyus" }, { label: "Equipment", href: "/#equipment" }, { label: "Quality Policy", href: "/#quality" }, { label: "Portfolio", href: "/#portfolio" }, { label: "Contact Us", href: "/#contact" }]
 };
 
-// دالة جلب البيانات المحدثة
+// دالة جلب البيانات
 async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string, categorySlug: string): Promise<PageData> {
     const response = await fetch(process.env.WORDPRESS_API_URL!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         body: JSON.stringify({
+            // <<< تم تعديل الاستعلام هنا >>>
             query: `
-                query GetCoreServicesPageData($language: LanguageCodeEnum!, $homepageId: ID!, $categorySlug: [String]) {
-                    # جلب بيانات الفئة (العنوان والوصف) من الـ Taxonomy
-                    serviceGroups(where: { slug: $categorySlug, language: $language }) {
+                query GetCoreServicesPageData($language: LanguageCodeFilterEnum!, $homepageId: ID!, $categorySlug: [String]) {
+                    serviceGroups(where: { slug: $categorySlug }) {
                         nodes {
                             name
-                            description
+                            serviceGroupFields {
+                                categoryDescription
+                            }
                         }
                     }
-                    
-                    # جلب قائمة الخدمات الفرعية المرتبطة بهذه الفئة فقط
-                    coreServices(where: { taxQuery: { taxArray: [{ taxonomy: SERVICEGROUP, field: SLUG, terms: $categorySlug }] } }) {
+                    coreServices(where: { language: $language }) {
                         nodes {
                             title(format: RENDERED)
                             coreServiceDetails { 
@@ -57,8 +58,6 @@ async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string
                             }
                         }
                     }
-
-                    # جلب بيانات الهيدر والفوتر
                     page(id: $homepageId, idType: DATABASE_ID) {
                         siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
                         siteOptionsFields { logo { node { sourceUrl altText } } }
@@ -66,7 +65,7 @@ async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string
                     }
                 }
             `,
-            variables: { language: language === 'AR' ? 'AR' : 'EN', homepageId, categorySlug }
+            variables: { language, homepageId, categorySlug }
         })
     });
     const json = await response.json();
@@ -83,7 +82,6 @@ export default async function CoreServicesPage({ params }: { params: { lang: 'ar
     const isRTL = lang === 'ar';
     const langCode = isRTL ? 'AR' : 'EN';
     const homepageId = isRTL ? "87" : "64";
-    // الـ Slug الخاص بالفئة التي أنشأتها
     const categorySlug = isRTL ? "الخدمات-الأساسية" : "core-services"; 
     
     const data = await getCoreServicesPageData(langCode, homepageId, categorySlug);
@@ -92,7 +90,6 @@ export default async function CoreServicesPage({ params }: { params: { lang: 'ar
         return <div className="min-h-screen flex items-center justify-center">Failed to load services data for: {categorySlug}.</div>;
     }
     
-    // استخدام المصدر الصحيح للبيانات
     const pageInfo = data.serviceGroups.nodes[0];
     const subServices = data.coreServices.nodes.map(node => ({
         title: node.coreServiceDetails.subServiceTitle || node.title,
@@ -117,10 +114,10 @@ export default async function CoreServicesPage({ params }: { params: { lang: 'ar
                         <h1 className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
                             {pageInfo.name}
                         </h1>
-                        {pageInfo.description && (
+                        {pageInfo.serviceGroupFields?.categoryDescription && (
                             <div
                                 className={`max-w-3xl mx-auto text-lg leading-relaxed text-text-secondary prose dark:prose-invert ${isRTL ? "font-almarai-regular" : "font-normal"}`}
-                                dangerouslySetInnerHTML={{ __html: pageInfo.description }}
+                                dangerouslySetInnerHTML={{ __html: pageInfo.serviceGroupFields.categoryDescription }}
                             />
                         )}
                     </div>
