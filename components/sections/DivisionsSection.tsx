@@ -65,7 +65,9 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
 
   // كشف الاتجاه
   useEffect(() => {
-    setIsRTL(document.documentElement.dir === 'rtl');
+    if (typeof window !== 'undefined') {
+      setIsRTL(document.documentElement.dir === 'rtl');
+    }
   }, []);
 
   // حساب العرض
@@ -75,9 +77,11 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
         setContainerWidth(imageContainerRef.current.offsetWidth);
       }
     }
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    if (typeof window !== 'undefined') {
+      handleResize();
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
   }, []);
 
   // التشغيل التلقائي
@@ -109,37 +113,22 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
     const isLeft = (activeIndex - 1 + divisionsLength) % divisionsLength === index;
     const isRight = (activeIndex + 1) % divisionsLength === index;
 
-    if (isActive) {
-      return {
-        zIndex: 3,
-        opacity: 1,
-        pointerEvents: "auto",
-        transform: `translateX(0px) translateY(0px) scale(1) rotateY(0deg)`,
-        transition: "all 0.8s cubic-bezier(.4,2,.3,1)",
-      };
+    const scale = isActive ? 1 : 0.85;
+
+    let transform = `scale(${scale})`;
+    if (!isActive) {
+      if (isLeft) {
+        transform = `translateX(-${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(15deg)`;
+      } else if (isRight) {
+        transform = `translateX(${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(-15deg)`;
+      }
     }
-    if (isLeft) {
-      return {
-        zIndex: 2,
-        opacity: 1,
-        pointerEvents: "auto",
-        transform: `translateX(-${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(15deg)`,
-        transition: "all 0.8s cubic-bezier(.4,2,.3,1)",
-      };
-    }
-    if (isRight) {
-      return {
-        zIndex: 2,
-        opacity: 1,
-        pointerEvents: "auto",
-        transform: `translateX(${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(-15deg)`,
-        transition: "all 0.8s cubic-bezier(.4,2,.3,1)",
-      };
-    }
+
     return {
-      zIndex: 1,
-      opacity: 0,
-      pointerEvents: "none",
+      zIndex: isActive ? 3 : (isLeft || isRight) ? 2 : 1,
+      opacity: (isLeft || isRight || isActive) ? 1 : 0,
+      pointerEvents: (isLeft || isRight || isActive) ? "auto" : "none",
+      transform: transform,
       transition: "all 0.8s cubic-bezier(.4,2,.3,1)",
     };
   }
@@ -169,11 +158,11 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
         </motion.div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
             {/* عارض الصور الدائري */}
             <div 
               ref={imageContainerRef}
-              className="relative w-full h-96 flex items-center justify-center"
+              className="relative w-full aspect-square md:aspect-[4/3] flex items-center justify-center"
               style={{ perspective: '1000px' }}
             >
               {divisions.map((division, index) => (
@@ -181,7 +170,8 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   key={division.id}
                   src={extractFirstImageUrl(division.content)}
                   alt={division.title}
-                  className="absolute w-full h-full object-cover rounded-3xl shadow-2xl cursor-pointer"
+                  // <<< تم التعديل هنا: تصغير حجم الصور من 10/12 إلى 9/12 >>>
+                  className="absolute w-9/12 h-9/12 object-cover rounded-3xl shadow-2xl cursor-pointer"
                   style={getImageStyle(index)}
                   onClick={() => setActiveIndex(index)}
                 />
@@ -204,6 +194,9 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   >
                     {activeDivision.title}
                   </h3>
+                  <p className={`text-text-secondary mb-6 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    {isRTL ? "قسم من أقسامنا" : "A Division of Ours"}
+                  </p>
                   <motion.p className={`text-text-secondary leading-relaxed text-lg ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
                     {extractTextContent(activeDivision.content).split(" ").map((word, i) => (
                       <motion.span

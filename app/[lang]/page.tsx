@@ -13,6 +13,8 @@ import { ServicesSection } from "@/components/sections/ServicesSection";
 import { DivisionsSection } from "@/components/sections/DivisionsSection";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+// <<< 1. تم استيراد المكون الجديد >>>
+import { BrandStatementSection } from "@/components/sections/BrandStatementSection";
 
 
 // DYNAMIC IMPORTS
@@ -36,6 +38,8 @@ interface Service { id: string; title: string; slug: string; serviceDetails: { s
 interface Division { id: string; title: string; content: string; divisionDetails: { divisionIcon: string; }; }
 interface PortfolioItem { id: string; title: string; portfolioItemDetails: { commonText: string; binomialText: string; photo: { node: ImageNode; }; }; }
 interface ContactInfoData { contactSectionTitle: string; contactSectionSubtitle: string; emailAddress: string; phoneNumber: string; unifiedNumber: string; branchesAddress: string; qrCodeImage: { node: { sourceUrl: string; altText: string; } }; qrCodeText: string; }
+// <<< 2. تم إضافة واجهة للقسم الجديد >>>
+interface BrandStatementData { sideTitle: string; paragraphs: string; quote: string; }
 
 interface HeroSlideNode {
   title: string;
@@ -69,6 +73,8 @@ interface PageData {
     contactInfo: ContactInfoData;
     siteOptionsFields: SiteOptionsFields;
     siteOptions: SiteOptions;
+    // <<< 3. تم إضافة الحقل الجديد هنا >>>
+    brandStatementSection?: BrandStatementData;
   };
   heroSlides: {
     nodes: HeroSlideNode[]
@@ -142,6 +148,8 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     contactInfo { contactSectionTitle contactSectionSubtitle emailAddress phoneNumber unifiedNumber branchesAddress qrCodeImage { node { sourceUrl altText } } qrCodeText }
                     siteOptionsFields { logo { node { sourceUrl altText } } }
                     siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
+                    # <<< 4. تم إضافة الحقل الجديد إلى الاستعلام >>>
+                    brandStatementSection { sideTitle paragraphs quote }
                   }
                   services(first: 10, where: {language: $language}) { 
                     nodes { 
@@ -206,6 +214,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
   const whyUsListItems = page.whyUsSection.whyUsList.split('\n').filter(item => item.trim() !== '');
   const qualityCommitmentsList = page.qualityPolicySection.qualityCommitments.split('\n').filter(item => item.trim() !== '');
 
+  // <<< 5. تم معالجة بيانات القسم الجديد هنا >>>
+  const brandStatementData = page.brandStatementSection;
+  const paragraphsArray = brandStatementData && brandStatementData.paragraphs 
+      ? brandStatementData.paragraphs.split('\n').filter(p => p.trim() !== '') 
+      : [];
+      
   const slides: Slide[] = heroSlides.nodes
     .filter(node => node?.heroSlideacf?.image?.node?.sourceUrl)
     .map(node => ({
@@ -655,6 +669,16 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.div>
           </div>
         </section>
+
+        {/* <<< 6. تم إضافة المكون الجديد هنا في مكانه الصحيح >>> */}
+        {brandStatementData && (
+          <BrandStatementSection
+            sideTitle={brandStatementData.sideTitle}
+            paragraphs={paragraphsArray}
+            quote={brandStatementData.quote}
+            isRTL={isRTL}
+          />
+        )}
 
         <section id="contact" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
