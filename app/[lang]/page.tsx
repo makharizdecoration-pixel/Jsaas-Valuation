@@ -1,4 +1,4 @@
-// app/page.tsx
+// app/[lang]/page.tsx
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
@@ -9,9 +9,10 @@ import { parse } from 'node-html-parser';
 import { ThemeToggleButton } from "@/components/ui/theme-toggle-button";
 import { HeroSlider, type Slide } from "@/components/ui/HeroSlider";
 import { AccreditationsSection } from "@/components/sections/AccreditationsSection";
-// 1. تم استيراد المكون الجديد
 import { ServicesSection } from "@/components/sections/ServicesSection";
 import { DivisionsSection } from "@/components/sections/DivisionsSection";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 
 // DYNAMIC IMPORTS
@@ -31,7 +32,7 @@ interface EquipmentSection { equipmentMainTitle: string; equipmentSubtitle: stri
 interface QualityPolicySection { qualityTitle: string; qualityContent: string; qualityCommitments: string; }
 interface WhyUsSection { whyUsTitle: string; whyUsSubtitle: string; whyUsList: string; }
 interface PortfolioSectionTitle { portfolioTitle: string; portfolioSubtitle: string; }
-interface Service { id: string; title: string; serviceDetails: { serviceDescription: string; serviceImage: { node: ImageNode }; }; }
+interface Service { id: string; title: string; slug: string; serviceDetails: { serviceDescription: string; serviceImage: { node: ImageNode }; }; }
 interface Division { id: string; title: string; content: string; divisionDetails: { divisionIcon: string; }; }
 interface PortfolioItem { id: string; title: string; portfolioItemDetails: { commonText: string; binomialText: string; photo: { node: ImageNode; }; }; }
 interface ContactInfoData { contactSectionTitle: string; contactSectionSubtitle: string; emailAddress: string; phoneNumber: string; unifiedNumber: string; branchesAddress: string; qrCodeImage: { node: { sourceUrl: string; altText: string; } }; qrCodeText: string; }
@@ -77,7 +78,7 @@ interface PageData {
   portfolioItems: { nodes: PortfolioItem[] };
 }
 
-const staticContent = {
+const staticNavItems = {
   ar: {
     nav: { items: [{ label: "الرئيس التنفيذي", href: "#ceo" }, { label: "من نحن", href: "#about" }, { label: "خدماتنا", href: "#services" }, { label: "أقسامنـا", href: "#divisions" }, { label: "لماذا نحن", href: "#whyus" }, { label: "معداتنا", href: "#equipment" }, { label: "سياسة الجودة", href: "#quality" }, { label: "معرض الأعمال", href: "#portfolio" }, { label: "تواصل معنا", href: "#contact" }] },
     contact: { title: "تواصل معنا", form: { name: "الاسم", email: "البريد الإلكتروني", phone: "رقم الهاتف", message: "الرسالة", submit: "إرسال" } },
@@ -88,25 +89,23 @@ const staticContent = {
   }
 };
 
-export default function Home() {
+export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<"ar" | "en">("ar");
-  // 2. تم حذف متغير الحالة القديم لأنه لم يعد مستخدماً
-  // const [activeService, setActiveService] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeDivision, setActiveDivision] = useState(0);
 
-  const isRTL = language === "ar";
-  const t = staticContent[language] || staticContent.ar;
+  const { lang } = params;
+  const isRTL = lang === 'ar';
+  const t = staticNavItems[lang] || staticNavItems.ar;
 
   useEffect(() => {
     async function fetchAllData() {
       setIsLoading(true);
       setError(null);
-      const langParam = isRTL ? 'AR' : 'EN';
+      const langCode = isRTL ? 'AR' : 'EN';
       const pageId = isRTL ? "87" : "64";
       try {
         const response = await fetch('/api/graphql', {
@@ -144,12 +143,22 @@ export default function Home() {
                     siteOptionsFields { logo { node { sourceUrl altText } } }
                     siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
                   }
-                  services(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) serviceDetails { serviceDescription serviceImage { node { sourceUrl altText } } } } }
+                  services(first: 10, where: {language: $language}) { 
+                    nodes { 
+                      id 
+                      title(format: RENDERED) 
+                      slug 
+                      serviceDetails { 
+                        serviceDescription 
+                        serviceImage { node { sourceUrl altText } } 
+                      } 
+                    } 
+                  }
                   divisions(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) content(format: RENDERED) divisionDetails { divisionIcon } } }
                   portfolioItems(first: 20, where: {language: $language}) { nodes { id title portfolioItemDetails { commonText binomialText photo { node { sourceUrl altText } } } } }
                 }
             `,
-            variables: { language: langParam, pageId: pageId }
+            variables: { language: langCode, pageId: pageId }
           }),
         });
         if (!response.ok) { const errorText = await response.text(); throw new Error(`API route failed: ${errorText}`); }
@@ -168,11 +177,6 @@ export default function Home() {
   }, [isRTL]);
 
   useEffect(() => {
-    document.documentElement.dir = isRTL ? "rtl" : "ltr";
-    document.documentElement.lang = language;
-  }, [language, isRTL]);
-
-  useEffect(() => {
     const handleScroll = () => { setShowScrollTop(window.scrollY > 500); };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -184,22 +188,6 @@ export default function Home() {
     const images = root.querySelectorAll('img');
     return images.map(img => img.getAttribute('src') || '').filter(Boolean);
   };
-
-  const removeGalleryFromHtml = (htmlContent: string): string => {
-    if (!htmlContent) return '';
-    const root = parse(htmlContent);
-    const gallery = root.querySelector('.wp-block-gallery');
-    if (gallery) { gallery.remove(); }
-    return root.toString();
-  };
-
-  // 3. تم حذف دالة المساعدة القديمة لأن المكون الجديد يعالج منطقه بنفسه
-  /*
-  const getServiceFeatures = (index: number) => {
-    const desc = pageData?.services?.nodes[index]?.serviceDetails?.serviceDescription || "";
-    return desc.split('\n').slice(1).filter(line => line.trim() !== '');
-  };
-  */
 
   const fadeInUp = { initial: { opacity: 0, y: 60 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: "easeOut" }, };
   const staggerContainer = { animate: { transition: { staggerChildren: 0.1, }, }, };
@@ -225,69 +213,21 @@ export default function Home() {
       title: node.title,
       subtitle: node.heroSlideacf.subtitle
     }));
+    
+  const navItems = isRTL ? t.nav.items : t.nav.items;
 
   return (
     <div className={`min-h-screen bg-background text-text-primary ${isRTL ? "font-almarai-regular" : "font-sans"}`}>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-jassas-footer-bg border-b-2 border-jassas-accent-red">
-        <div className="container mx-auto max-w-7xl h-16 flex items-center px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between w-full">
-            <motion.div className="flex-shrink-0" initial={{ opacity: 0, x: isRTL ? 20 : -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-              <div className="flex items-center">
-                {page.siteOptionsFields?.logo?.node?.sourceUrl && (
-                  <img src={page.siteOptionsFields.logo.node.sourceUrl} alt={page.siteOptionsFields.logo.node.altText || "Makharez Logo"} className="h-10 w-auto" />
-                )}
-              </div>
-            </motion.div>
-            <div className="hidden lg:flex items-center justify-end flex-grow gap-6">
-              <div className={`flex items-center xl:space-x-8 lg:space-x-4 whitespace-nowrap ${isRTL ? "space-x-reverse" : ""}`}>
-                {t.nav.items.map((item, index) => (
-                  <motion.a
-                    key={item.href}
-                    href={item.href}
-                    className="text-static-white hover:text-jassas-accent-red font-semibold transition-colors xl:text-base lg:text-sm"
-                    whileHover={{ y: -2 }}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    {item.label}
-                  </motion.a>
-                ))}
-              </div>
-              <div className="flex items-center space-x-4 flex-shrink-0">
-                <motion.button onClick={() => setLanguage(language === "ar" ? "en" : "ar")} className="flex items-center space-x-2 px-3 py-1 rounded-lg font-semibold bg-jassas-accent-red text-static-white hover:bg-static-white hover:text-jassas-accent-red transition-colors" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Globe className="w-4 h-4" />
-                  <span className="text-sm font-medium">{language === "ar" ? "EN" : "AR"}</span>
-                </motion.button>
-                <ThemeToggleButton />
-              </div>
-            </div>
-            <div className="lg:hidden flex items-center gap-4">
-              <ThemeToggleButton />
-              <motion.button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-static-white hover:opacity-80" whileTap={{ scale: 0.95 }}>
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </motion.button>
-            </div>
-          </div>
-        </div>
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div className="lg:hidden bg-white border-t border-gray-200" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-              <div className="px-4 py-2 space-y-2">
-                {t.nav.items.map((item) => (<a key={item.href} href={item.href} className="block py-2 text-gray-600 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}> {item.label} </a>))}
-                <button onClick={() => { setLanguage(language === "ar" ? "en" : "ar"); setIsMenuOpen(false); }} className="flex items-center space-x-2 py-2 text-gray-600 hover:text-accent transition-colors">
-                  <Globe className="w-4 h-4" />
-                  <span>{language === "ar" ? "English" : "العربية"}</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+        <Header 
+            logoUrl={page.siteOptionsFields.logo.node.sourceUrl}
+            logoAlt={page.siteOptionsFields.logo.node.altText || "Jassas Logo"}
+            navItems={navItems}
+            lang={lang}
+        />
 
-      <main key={language}>
+      <main key={lang}>
         <HeroSlider className="h-screen" slides={slides} />
-
+        
         <section id="ceo" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -504,7 +444,6 @@ export default function Home() {
           galleryHtml={page.accreditationsSection.accreditationsGallery}
         />
 
-        {/* 4. تم استبدال قسم الخدمات القديم بالكامل بالمكون الجديد */}
         <section id="services" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -526,7 +465,7 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <ServicesSection services={services.nodes} />
+            <ServicesSection services={services.nodes} lang={lang} />
 
           </div>
         </section>
@@ -859,74 +798,20 @@ export default function Home() {
 
       </main>
 
-      <footer className="bg-jassas-footer-bg py-12">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-
-            <div>
-              <h3 className={`text-xl font-bold text-static-white mb-4 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
-                {page.siteOptions.footerTitle}
-              </h3>
-              <p className={`text-static-white/80 mb-4 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
-                {page.siteOptions.footerDescription}
-              </p>
-              <div className="flex">
-                {page.siteOptions.footerLogo?.node?.sourceUrl && (
-                  <img
-                    src={page.siteOptions.footerLogo.node.sourceUrl}
-                    alt={page.siteOptions.footerLogo.node.altText || 'Footer Logo'}
-                    className="h-12 w-auto"
-                  />
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h3 className={`text-xl font-bold text-static-white mb-4 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
-                {isRTL ? "روابط سريعة" : "Quick Links"}
-              </h3>
-              <ul className="space-y-2">
-                {t.nav.items.map((item) => (
-                  <li key={item.href}>
-                    <a
-                      href={item.href}
-                      className={`text-static-white hover:text-jassas-accent-red transition-colors ${isRTL ? "font-almarai-regular" : "font-normal"}`}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className={`text-xl font-bold text-static-white mb-4 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
-                {isRTL ? "تواصل معنا" : "Contact Us"}
-              </h3>
-              {page.contactInfo && (
-                <div className="space-y-2">
-                  <p className={`text-static-white ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
-                    {page.contactInfo.emailAddress}
-                  </p>
-                  <p className={`text-static-white ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
-                    {page.contactInfo.phoneNumber}
-                  </p>
-                  <p className={`text-static-white ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
-                    {page.contactInfo.unifiedNumber}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 pt-8 text-center">
-            <p className={`text-text-secondary/70 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
-              {isRTL ? `© ${new Date().getFullYear()} جساس للمقاولات. جميع الحقوق محفوظة.` : `© ${new Date().getFullYear()} Jsaas Contracting. All rights reserved.`}
-            </p>
-          </div>
-        </div>
-      </footer>
-
+        <Footer
+            footerTitle={page.siteOptions.footerTitle}
+            footerDescription={page.siteOptions.footerDescription}
+            footerLogoUrl={page.siteOptions.footerLogo.node.sourceUrl}
+            footerLogoAlt={page.siteOptions.footerLogo.node.altText}
+            quickLinks={navItems}
+            contactInfo={{
+              email: page.contactInfo.emailAddress,
+              phone: page.contactInfo.phoneNumber,
+              unified: page.contactInfo.unifiedNumber
+            }}
+            isRTL={isRTL}
+        />
+      
       <motion.button
         className="fixed bottom-8 right-8 bg-accent text-accent-text p-3 rounded-full shadow-lg hover:bg-accent/90 transition-colors z-50"
         initial={{ opacity: 0, scale: 0 }}

@@ -1,60 +1,81 @@
-// app/[lang]/services/core/page.tsx
+// app/[lang]/services/[slug]/page.tsx
 
 import { InteractiveServiceViewer } from "@/components/sections/InteractiveServiceViewer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { notFound } from 'next/navigation';
 
-// --- واجهات البيانات ---
+// --- واجهات البيانات (Interfaces) ---
 interface ImageNode { sourceUrl: string; altText: string; }
 interface SiteOptions { footerTitle: string; footerDescription: string; footerLogo: { node: ImageNode }; }
 interface SiteOptionsFields { logo: { node: ImageNode }; }
-interface SubService { subServiceTitle: string; subServiceDescription: string; subServiceImages: string; }
 interface ContactInfo { emailAddress: string; phoneNumber: string; unifiedNumber: string; }
-interface CoreServicesData { nodes: { title: string; coreServiceDetails: Omit<SubService, 'subServiceTitle'> & { subServiceTitle?: string }; }[]; }
-interface PageNodeForOptions { siteOptions: SiteOptions; siteOptionsFields: SiteOptionsFields; contactInfo: ContactInfo; }
-interface MainCategoryData {
-    name: string;
-    serviceGroupFields: { // اسم مجموعة الحقول من ACF
-        categoryDescription: string;
+interface GenericSubService {
+    title: string;
+    coreServiceDetails?: {
+        subServiceTitle?: string;
+        subServiceDescription: string;
+        subServiceImages: string;
     };
 }
-interface PageData { 
-    coreServices: CoreServicesData; 
-    serviceGroups: { nodes: [MainCategoryData] };
-    page: PageNodeForOptions;
+// <<< تم تحديث الواجهة لتشمل الترجمات >>>
+interface MainCategoryData {
+    name: string;
+    translations?: {
+        slug: string;
+        language: {
+            code: string;
+        };
+    }[];
+    serviceGroupFields: {
+        categoryDescription: string;
+    };
+    contentNodes: {
+        nodes: GenericSubService[];
+    };
+}
+interface PageData {
+    serviceGroups: { nodes: MainCategoryData[] };
+    page: {
+        siteOptions: SiteOptions;
+        siteOptionsFields: SiteOptionsFields;
+        contactInfo: ContactInfo;
+    };
 }
 
-// بيانات القوائم الثابتة
 const staticNavItems = {
   ar: [{ label: "الرئيس التنفيذي", href: "/#ceo" }, { label: "من نحن", href: "/#about" }, { label: "خدماتنا", href: "/#services" }, { label: "أقسامنـا", href: "/#divisions" }, { label: "لماذا نحن", href: "/#whyus" }, { label: "معداتنا", href: "/#equipment" }, { label: "سياسة الجودة", href: "/#quality" }, { label: "معرض الأعمال", href: "/#portfolio" }, { label: "تواصل معنا", href: "/#contact" }],
   en: [{ label: "CEO", href: "/#ceo" }, { label: "About Us", href: "/#about" }, { label: "Services", href: "/#services" }, { label: "Divisions", href: "/#divisions" }, { label: "Why Us", href: "/#whyus" }, { label: "Equipment", href: "/#equipment" }, { label: "Quality Policy", href: "/#quality" }, { label: "Portfolio", href: "/#portfolio" }, { label: "Contact Us", href: "/#contact" }]
 };
 
-// دالة جلب البيانات
-async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string, categorySlug: string): Promise<PageData> {
+async function getServicePageData(homepageId: string, categorySlug: string): Promise<PageData> {
     const response = await fetch(process.env.WORDPRESS_API_URL!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         body: JSON.stringify({
-            // <<< تم تعديل الاستعلام هنا >>>
             query: `
-                query GetCoreServicesPageData($language: LanguageCodeFilterEnum!, $homepageId: ID!, $categorySlug: [String]) {
+                query GetServicePageData($homepageId: ID!, $categorySlug: [String]) {
                     serviceGroups(where: { slug: $categorySlug }) {
                         nodes {
                             name
+                            # <<< تم إضافة هذا الجزء لجلب الترجمات >>>
+                            translations {
+                                slug
+                                language {
+                                    code
+                                }
+                            }
                             serviceGroupFields {
                                 categoryDescription
                             }
-                        }
-                    }
-                    coreServices(where: { language: $language }) {
-                        nodes {
-                            title(format: RENDERED)
-                            coreServiceDetails { 
-                                subServiceTitle 
-                                subServiceDescription 
-                                subServiceImages 
+                            contentNodes {
+                                nodes {
+                                    ... on NodeWithTitle { title }
+                                    ... on WithAcfCoreServiceDetails {
+                                        coreServiceDetails { subServiceTitle subServiceDescription subServiceImages }
+                                    }
+                                }
                             }
                         }
                     }
@@ -65,7 +86,7 @@ async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string
                     }
                 }
             `,
-            variables: { language, homepageId, categorySlug }
+            variables: { homepageId, categorySlug }
         })
     });
     const json = await response.json();
@@ -76,25 +97,32 @@ async function getCoreServicesPageData(language: 'AR' | 'EN', homepageId: string
     return json.data;
 }
 
-// المكون الرئيسي للصفحة
-export default async function CoreServicesPage({ params }: { params: { lang: 'ar' | 'en' } }) {
-    const { lang } = params;
+export default async function ServicePage({ params }: { params: { lang: 'ar' | 'en', slug: string } }) {
+    const { lang, slug } = params;
     const isRTL = lang === 'ar';
-    const langCode = isRTL ? 'AR' : 'EN';
     const homepageId = isRTL ? "87" : "64";
-    const categorySlug = isRTL ? "الخدمات-الأساسية" : "core-services"; 
     
-    const data = await getCoreServicesPageData(langCode, homepageId, categorySlug);
+    const data = await getServicePageData(homepageId, slug);
 
-    if (!data || !data.coreServices || !data.serviceGroups?.nodes.length || !data.page) {
-        return <div className="min-h-screen flex items-center justify-center">Failed to load services data for: {categorySlug}.</div>;
+    if (!data || !data.serviceGroups?.nodes || data.serviceGroups.nodes.length === 0) {
+        notFound();
     }
     
     const pageInfo = data.serviceGroups.nodes[0];
-    const subServices = data.coreServices.nodes.map(node => ({
-        title: node.coreServiceDetails.subServiceTitle || node.title,
-        subServiceDescription: node.coreServiceDetails.subServiceDescription,
-        subServiceGallery: node.coreServiceDetails.subServiceImages, 
+    
+    // <<< تم إضافة هذا الجزء لمعالجة روابط اللغات >>>
+    const languageAlternates = pageInfo.translations?.reduce((acc, translation) => {
+        const langKey = translation.language.code.toLowerCase().startsWith('en') ? 'en' : 'ar';
+        acc[langKey] = translation.slug;
+        return acc;
+    }, {} as Record<string, string>);
+
+    const subServices = pageInfo.contentNodes.nodes
+      .filter(node => node && node.coreServiceDetails)
+      .map(node => ({
+        title: node.coreServiceDetails!.subServiceTitle || node.title,
+        subServiceDescription: node.coreServiceDetails!.subServiceDescription,
+        subServiceGallery: node.coreServiceDetails!.subServiceImages, 
     }));
     
     const { siteOptions, siteOptionsFields, contactInfo } = data.page;
@@ -107,6 +135,8 @@ export default async function CoreServicesPage({ params }: { params: { lang: 'ar
                 logoAlt={siteOptionsFields.logo.node.altText || "Jassas Logo"}
                 navItems={navItems}
                 lang={lang}
+                // <<< تم تمرير البيانات الجديدة إلى الهيدر >>>
+                alternates={languageAlternates}
             />
             <main className="pt-24 pb-16">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -121,7 +151,14 @@ export default async function CoreServicesPage({ params }: { params: { lang: 'ar
                             />
                         )}
                     </div>
-                    <InteractiveServiceViewer subServices={subServices} isRTL={isRTL} />
+                    
+                    {subServices.length > 0 ? (
+                        <InteractiveServiceViewer subServices={subServices} isRTL={isRTL} />
+                    ) : (
+                        <div className="text-center text-text-secondary py-10">
+                            <p>لا توجد خدمات فرعية لعرضها في هذا القسم حاليًا.</p>
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer

@@ -5,10 +5,13 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
+// <<< 1. تم تعديل الواجهة هنا >>>
 interface Service {
   id: string;
   title: string;
+  slug: string; // تمت إضافة slug
   serviceDetails: {
     serviceDescription: string;
     serviceImage?: {
@@ -23,19 +26,16 @@ interface Service {
 interface ServicesSectionProps {
   services: Service[];
   className?: string;
+  lang: 'ar' | 'en'; // تمت إضافة اللغة
 }
 
 const AUTOPLAY_DELAY = 5000;
 
-export function ServicesSection({ services, className }: ServicesSectionProps) {
+export function ServicesSection({ services, className, lang }: ServicesSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isRTL, setIsRTL] = useState(false);
+  // <<< 2. تم تعديل طريقة تحديد اللغة هنا >>>
+  const isRTL = lang === 'ar';
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    // تحديد الاتجاه من الـ HTML dir attribute
-    setIsRTL(document.documentElement.dir === 'rtl');
-  }, []);
 
   if (!services || services.length === 0) {
     return null;
@@ -70,7 +70,6 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
 
   return (
     <div className={cn("w-full max-w-5xl mx-auto px-4", className)}>
-      {/* أزرار أسماء الخدمات */}
       <div className='flex justify-center items-center flex-wrap gap-3 mb-12'>
         {services.map((service, serviceIndex) => (
           <button
@@ -89,15 +88,14 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
         ))}
       </div>
 
-      {/* --- تصميم شاشات سطح المكتب --- */}
       <div className='hidden md:flex justify-center items-center'>
         <motion.div 
+          dir={isRTL ? 'rtl' : 'ltr'}
           className='relative w-full max-w-4xl flex items-center justify-center'
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          {/* الصورة */}
           <div className='w-[470px] h-[470px] rounded-3xl overflow-hidden bg-background-secondary flex-shrink-0 shadow-xl'>
             <AnimatePresence mode='wait'>
               <motion.div
@@ -119,8 +117,7 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
             </AnimatePresence>
           </div>
 
-          {/* البطاقة - هتاخد موقعها تلقائي حسب الـ dir */}
-          <div className='bg-background dark:bg-card rounded-3xl shadow-2xl p-8 -ms-[80px] max-w-lg flex-1 z-10'>
+          <div className='bg-background dark:bg-card rounded-3xl shadow-2xl p-8 -ms-[80px] me-auto max-w-lg flex-1 z-10'>
             <AnimatePresence mode='wait'>
               <motion.div
                 key={currentService.id + 'text'}
@@ -137,11 +134,18 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
                       {currentService.serviceDetails.serviceDescription}
                    </p>
                 </div>
+                {/* <<< 3. تمت إضافة زر "اقرأ المزيد" هنا >>> */}
+                <div className="mt-4">
+                  <Link href={`/${lang}/services/${currentService.slug}`}>
+                    <span className="inline-block bg-accent text-accent-text font-bold py-2 px-6 rounded-lg hover:bg-accent/90 transition-colors">
+                      {isRTL ? "اقرأ المزيد" : "Read More"}
+                    </span>
+                  </Link>
+                </div>
               </motion.div>
             </AnimatePresence>
 
-            {/* أسهم التنقل */}
-            <div className='flex items-center gap-4 pt-4 border-t border-border/40'>
+            <div className='flex items-center gap-4 pt-4 mt-4 border-t border-border/40'>
               <button
                 onClick={handlePrevious}
                 aria-label='Previous service'
@@ -161,7 +165,6 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
         </motion.div>
       </div>
 
-      {/* --- تصميم شاشات الجوال --- */}
       <div className='md:hidden max-w-sm mx-auto text-center'>
         <div className='w-full aspect-square bg-background-secondary rounded-3xl overflow-hidden mb-6 shadow-lg'>
           <AnimatePresence mode='wait'>
@@ -199,6 +202,14 @@ export function ServicesSection({ services, className }: ServicesSectionProps) {
                 <p className='text-text-secondary text-sm leading-relaxed whitespace-pre-wrap'>
                   {currentService.serviceDetails.serviceDescription}
                 </p>
+              </div>
+              {/* <<< 3. تمت إضافة زر "اقرأ المزيد" هنا >>> */}
+              <div className="mt-4">
+                <Link href={`/${lang}/services/${currentService.slug}`}>
+                  <span className="inline-block bg-accent text-accent-text font-bold py-2 px-6 rounded-lg hover:bg-accent/90 transition-colors">
+                    {isRTL ? "اقرأ المزيد" : "Read More"}
+                  </span>
+                </Link>
               </div>
             </motion.div>
           </AnimatePresence>

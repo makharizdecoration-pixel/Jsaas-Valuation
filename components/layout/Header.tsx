@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from 'next/navigation'; // استيراد hook جديد
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe } from "lucide-react";
 import { ThemeToggleButton } from "@/components/ui/theme-toggle-button";
@@ -13,24 +13,41 @@ interface NavItem {
   href: string;
 }
 
+// <<< تم تحديث الواجهة هنا >>>
 interface HeaderProps {
   logoUrl: string;
   logoAlt: string;
   navItems: NavItem[];
   lang: 'ar' | 'en';
+  alternates?: Record<string, string>; // خاصية اختيارية لروابط اللغات
 }
 
-export function Header({ logoUrl, logoAlt, navItems, lang }: HeaderProps) {
+export function Header({ logoUrl, logoAlt, navItems, lang, alternates }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const isRTL = lang === "ar";
 
-  // دالة لتوليد الرابط باللغة الأخرى
+  // <<< تم تعديل هذه الدالة بالكامل >>>
   const getSwitchedLanguagePath = () => {
     const newLang = lang === 'ar' ? 'en' : 'ar';
-    // يزيل اللغة الحالية من الرابط ويضيف الجديدة
-    const newPath = pathname.replace(`/${lang}`, `/${newLang}`);
-    return newPath;
+    
+    // تحقق إذا كان هناك رابط ترجمة مباشر لهذه الصفحة
+    if (alternates && alternates[newLang]) {
+      // إذا كان مسار الصفحة الحالية يحتوي على /services/، ابنِ الرابط الكامل
+      if (pathname.includes('/services/')) {
+        return `/${newLang}/services/${alternates[newLang]}`;
+      }
+      // يمكنك إضافة شروط أخرى هنا لصفحات ديناميكية أخرى مستقبلاً
+    }
+    
+    // إذا لم يكن هناك رابط ترجمة، استخدم الطريقة القديمة (تغيير اللغة في الرابط الحالي)
+    // هذا مناسب للصفحة الرئيسية والصفحات الثابتة
+    if (pathname.startsWith(`/${lang}`)) {
+      return pathname.replace(`/${lang}`, `/${newLang}`);
+    }
+    
+    // كحل أخير، اذهب للصفحة الرئيسية باللغة الجديدة
+    return `/${newLang}`;
   };
 
   return (
@@ -53,7 +70,6 @@ export function Header({ logoUrl, logoAlt, navItems, lang }: HeaderProps) {
               {navItems.map((item, index) => (
                 <motion.a
                   key={item.href}
-                  // الروابط الآن تأخذ اللغة في الاعتبار
                   href={`/${lang}${item.href}`}
                   className="text-static-white hover:text-jassas-accent-red font-semibold transition-colors xl:text-base lg:text-sm"
                   whileHover={{ y: -2 }}
@@ -66,7 +82,6 @@ export function Header({ logoUrl, logoAlt, navItems, lang }: HeaderProps) {
               ))}
             </div>
             <div className="flex items-center space-x-4 flex-shrink-0">
-              {/* زر اللغة الآن هو رابط <Link> */}
               <Link href={getSwitchedLanguagePath()} passHref>
                 <motion.div
                   className="flex items-center space-x-2 px-3 py-1 rounded-lg font-semibold bg-jassas-accent-red text-static-white hover:bg-static-white hover:text-jassas-accent-red transition-colors cursor-pointer" 
