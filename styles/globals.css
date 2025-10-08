@@ -86,10 +86,10 @@
 }
 
 /* 6) Custom utility classes for bilingual support */
-.font-almarai-bold {
+.font-arabic font-bold {
   font-family: "Almarai-Bold";
 }
 
-.font-almarai-regular {
+.font-arabic {
   font-family: "Almarai-Regular";
 }

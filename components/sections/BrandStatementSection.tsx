@@ -30,7 +30,7 @@ export const BrandStatementSection: React.FC<BrandStatementProps> = ({ sideTitle
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            <h2 className={`text-5xl lg:text-6xl font-bold leading-tight ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+            <h2 className={`text-5xl lg:text-6xl font-bold leading-tight ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
               {sideTitle}
             </h2>
           </motion.div>
@@ -43,7 +43,7 @@ export const BrandStatementSection: React.FC<BrandStatementProps> = ({ sideTitle
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
           >
-            <div className={`space-y-6 text-lg text-text-secondary leading-relaxed ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+            <div className={`space-y-6 text-lg text-text-secondary leading-relaxed ${isRTL ? "font-arabic" : "font-normal"}`}>
               {paragraphs.map((p, index) => (
                 <p key={index}>{p}</p>
               ))}
@@ -51,7 +51,7 @@ export const BrandStatementSection: React.FC<BrandStatementProps> = ({ sideTitle
             
             {/* خط فاصل واقتباس */}
             <div className="mt-8 pt-8 border-t border-border/50">
-              <p className={`text-xl text-text-primary italic ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+              <p className={`text-xl text-text-primary italic ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                 "{quote}"
               </p>
             </div>

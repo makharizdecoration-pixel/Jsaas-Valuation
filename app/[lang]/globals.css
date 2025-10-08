@@ -28,22 +28,7 @@
 /* 3) الاستيرادات الأخرى */
 @import "tw-animate-css";
 
-/* 4) تعريفات الخطوط */
-@font-face {
-  font-family: "Almarai-Bold";
-  src: url("/fonts/Almarai-Bold.woff2") format("woff2");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Almarai-Regular";
-  src: url("/fonts/Almarai-Regular.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+/* 4) تعريفات الخطوط (تم حذف تعريفات Almarai من هنا) */
 
 /* 5) Custom animations */
 @keyframes float {
@@ -82,14 +67,7 @@
   }
 }
 
-/* 6) Custom utility classes for bilingual support */
-.font-almarai-bold {
-  font-family: "Almarai-Bold";
-}
-
-.font-almarai-regular {
-  font-family: "Almarai-Regular";
-}
+/* 6) Custom utility classes (تم حذف كلاسات Almarai من هنا) */
 
 html {
   scroll-behavior: smooth;

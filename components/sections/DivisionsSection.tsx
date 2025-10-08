@@ -149,10 +149,10 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+          <h2 className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
             {mainTitle}
           </h2>
-          <p className={`text-lg leading-relaxed text-text-secondary ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+          <p className={`text-lg leading-relaxed text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
             {subtitle}
           </p>
         </motion.div>
@@ -190,14 +190,14 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   <h3 
-                    className={`text-3xl font-bold text-text-primary mb-2 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                    className={`text-3xl font-bold text-text-primary mb-2 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                   >
                     {activeDivision.title}
                   </h3>
-                  <p className={`text-text-secondary mb-6 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                  <p className={`text-text-secondary mb-6 ${isRTL ? "font-arabic" : "font-normal"}`}>
                     {isRTL ? "قسم من أقسامنا" : "A Division of Ours"}
                   </p>
-                  <motion.p className={`text-text-secondary leading-relaxed text-lg ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                  <motion.p className={`text-text-secondary leading-relaxed text-lg ${isRTL ? "font-arabic" : "font-normal"}`}>
                     {extractTextContent(activeDivision.content).split(" ").map((word, i) => (
                       <motion.span
                         key={i}

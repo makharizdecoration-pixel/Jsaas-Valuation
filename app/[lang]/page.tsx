@@ -13,7 +13,6 @@ import { ServicesSection } from "@/components/sections/ServicesSection";
 import { DivisionsSection } from "@/components/sections/DivisionsSection";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-// <<< 1. تم استيراد المكون الجديد >>>
 import { BrandStatementSection } from "@/components/sections/BrandStatementSection";
 
 
@@ -38,7 +37,6 @@ interface Service { id: string; title: string; slug: string; serviceDetails: { s
 interface Division { id: string; title: string; content: string; divisionDetails: { divisionIcon: string; }; }
 interface PortfolioItem { id: string; title: string; portfolioItemDetails: { commonText: string; binomialText: string; photo: { node: ImageNode; }; }; }
 interface ContactInfoData { contactSectionTitle: string; contactSectionSubtitle: string; emailAddress: string; phoneNumber: string; unifiedNumber: string; branchesAddress: string; qrCodeImage: { node: { sourceUrl: string; altText: string; } }; qrCodeText: string; }
-// <<< 2. تم إضافة واجهة للقسم الجديد >>>
 interface BrandStatementData { sideTitle: string; paragraphs: string; quote: string; }
 
 interface HeroSlideNode {
@@ -73,7 +71,6 @@ interface PageData {
     contactInfo: ContactInfoData;
     siteOptionsFields: SiteOptionsFields;
     siteOptions: SiteOptions;
-    // <<< 3. تم إضافة الحقل الجديد هنا >>>
     brandStatementSection?: BrandStatementData;
   };
   heroSlides: {
@@ -148,7 +145,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     contactInfo { contactSectionTitle contactSectionSubtitle emailAddress phoneNumber unifiedNumber branchesAddress qrCodeImage { node { sourceUrl altText } } qrCodeText }
                     siteOptionsFields { logo { node { sourceUrl altText } } }
                     siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
-                    # <<< 4. تم إضافة الحقل الجديد إلى الاستعلام >>>
                     brandStatementSection { sideTitle paragraphs quote }
                   }
                   services(first: 10, where: {language: $language}) { 
@@ -214,7 +210,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
   const whyUsListItems = page.whyUsSection.whyUsList.split('\n').filter(item => item.trim() !== '');
   const qualityCommitmentsList = page.qualityPolicySection.qualityCommitments.split('\n').filter(item => item.trim() !== '');
 
-  // <<< 5. تم معالجة بيانات القسم الجديد هنا >>>
   const brandStatementData = page.brandStatementSection;
   const paragraphsArray = brandStatementData && brandStatementData.paragraphs 
       ? brandStatementData.paragraphs.split('\n').filter(p => p.trim() !== '') 
@@ -231,7 +226,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
   const navItems = isRTL ? t.nav.items : t.nav.items;
 
   return (
-    <div className={`min-h-screen bg-background text-text-primary ${isRTL ? "font-almarai-regular" : "font-sans"}`}>
+    <div className="min-h-screen bg-background text-text-primary">
         <Header 
             logoUrl={page.siteOptionsFields.logo.node.sourceUrl}
             logoAlt={page.siteOptionsFields.logo.node.altText || "Jassas Logo"}
@@ -282,13 +277,13 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 viewport={{ once: true }}
               >
                 <motion.h2
-                  className={`text-3xl md:text-4xl font-bold mb-4 text-accent ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                  className={`text-3xl md:text-4xl font-bold mb-4 text-accent ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
                 >
                   {page.homepageCeo.ceoSectionTitle}
                 </motion.h2>
                 <motion.h3
-                  className={`text-2xl md:text-3xl font-semibold mb-8 text-text-primary ${isRTL ? "font-almarai-bold" : "font-semibold"}`}
+                  className={`text-2xl md:text-3xl font-semibold mb-8 text-text-primary ${isRTL ? "font-arabic font-bold" : "font-semibold"}`}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} viewport={{ once: true }}
                 >
                   {page.homepageCeo.ceoName}
@@ -298,7 +293,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 1 }} viewport={{ once: true }}
                 >
                   <motion.p
-                    className={`text-lg md:text-xl leading-relaxed text-text-secondary italic relative z-10 ${isRTL ? "font-almarai-regular" : "font-normal"}`}
+                    className={`text-lg md:text-xl leading-relaxed text-text-secondary italic relative z-10 ${isRTL ? "font-arabic" : "font-normal"}`}
                     initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} viewport={{ once: true }}
                   >
                     {`"${page.homepageCeo.ceoMessage}"`}
@@ -309,7 +304,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                   initial={{ opacity: 0, width: 0 }} whileInView={{ opacity: 1, width: "100%" }} transition={{ duration: 0.8, delay: 1.4 }} viewport={{ once: true }}
                 >
                   <motion.p
-                    className={`text-accent font-semibold ${isRTL ? "font-almarai-bold" : "font-semibold"}`}
+                    className={`text-accent font-semibold ${isRTL ? "font-arabic font-bold" : "font-semibold"}`}
                     initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }} viewport={{ once: true }}
                   >
                     {page.homepageCeo.ceoJobTitle}
@@ -330,12 +325,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               viewport={{ once: true }}
             >
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.aboutUs.aboutSectionTitle}
               </h2>
               <p
-                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-almarai-regular" : "font-normal"} whitespace-pre-wrap`}
+                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-arabic" : "font-normal"} whitespace-pre-wrap`}
               >
                 {page.aboutUs.aboutSectionContent}
               </p>
@@ -360,11 +355,11 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       <motion.div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center" whileHover={{ scale: 1.1, backgroundColor: "rgba(253, 154, 1, 0.3)", rotate: 5 }} transition={{ duration: 0.2 }}>
                         <Eye className="w-6 h-6 text-accent" />
                       </motion.div>
-                      <motion.h3 className={`text-xl font-semibold text-text-primary ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+                      <motion.h3 className={`text-xl font-semibold text-text-primary ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                         {page.aboutUs.visionTitle}
                       </motion.h3>
                     </motion.div>
-                    <motion.p className={`text-text-secondary leading-relaxed ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    <motion.p className={`text-text-secondary leading-relaxed ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {page.aboutUs.visionContent}
                     </motion.p>
                   </div>
@@ -381,11 +376,11 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       <motion.div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center" whileHover={{ scale: 1.1, backgroundColor: "rgba(253, 154, 1, 0.3)", rotate: 5 }} transition={{ duration: 0.2 }}>
                         <Target className="w-6 h-6 text-accent" />
                       </motion.div>
-                      <motion.h3 className={`text-xl font-semibold text-text-primary ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+                      <motion.h3 className={`text-xl font-semibold text-text-primary ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                         {page.aboutUs.missionTitle}
                       </motion.h3>
                     </motion.div>
-                    <motion.p className={`text-text-secondary leading-relaxed ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    <motion.p className={`text-text-secondary leading-relaxed ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {page.aboutUs.missionContent}
                     </motion.p>
                   </div>
@@ -402,11 +397,11 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       <motion.div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center" whileHover={{ scale: 1.1, backgroundColor: "rgba(253, 154, 1, 0.3)", rotate: 5 }} transition={{ duration: 0.2 }}>
                         <Heart className="w-6 h-6 text-accent" />
                       </motion.div>
-                      <motion.h3 className={`text-xl font-semibold text-text-primary ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+                      <motion.h3 className={`text-xl font-semibold text-text-primary ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                         {page.aboutUs.valuesTitle}
                       </motion.h3>
                     </motion.div>
-                    <motion.p className={`text-text-secondary leading-relaxed ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    <motion.p className={`text-text-secondary leading-relaxed ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {page.aboutUs.valuesContent}
                     </motion.p>
                   </div>
@@ -437,10 +432,10 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       viewport={{ once: true }}
                     >
                       <div className="bg-background-secondary/80 backdrop-blur-sm rounded-xl p-4 border border-accent/20">
-                        <span className={`text-accent font-bold text-lg mb-1 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+                        <span className={`text-accent font-bold text-lg mb-1 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                           {page.aboutUs.vision2030Title}
                         </span>
-                        <p className={`text-text-secondary text-sm ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                        <p className={`text-text-secondary text-sm ${isRTL ? "font-arabic" : "font-normal"}`}>
                           {page.aboutUs.vision2030Tagline}
                         </p>
                       </div>
@@ -452,12 +447,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           </div>
         </section>
 
-        <AccreditationsSection
-          title={page.accreditationsSection.accreditationsTitle}
-          subtitle={page.accreditationsSection.accreditationsSubtitle}
-          galleryHtml={page.accreditationsSection.accreditationsGallery}
-        />
-
         <section id="services" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -468,12 +457,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               viewport={{ once: true }}
             >
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.servicesSectionTitles.servicesMainTitle}
               </h2>
               <p
-                className={`text-lg leading-relaxed text-text-secondary mb-12 ${isRTL ? "font-almarai-regular" : "font-normal"}`}
+                className={`text-lg leading-relaxed text-text-secondary mb-12 ${isRTL ? "font-arabic" : "font-normal"}`}
               >
                 {page.servicesSectionTitles.servicesSubtitle}
               </p>
@@ -501,12 +490,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               viewport={{ once: true }}
             >
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.whyUsSection.whyUsTitle}
               </h2>
               <p
-                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-almarai-regular" : "font-normal"}`}
+                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-arabic" : "font-normal"}`}
               >
                 {page.whyUsSection.whyUsSubtitle}
               </p>
@@ -526,7 +515,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                   variants={fadeInUp}
                 >
                   <CheckCircle className="w-6 h-6 text-accent" />
-                  <span className={`text-text-secondary ${isRTL ? "font-almarai-regular" : "font-normal"}`}>{item}</span>
+                  <span className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>{item}</span>
                 </motion.li>
               ))}
             </motion.ul>
@@ -567,13 +556,14 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
+                {/* ✨ التعديل الثاني: تم تصغير حجم الخط وزيادة تباعد الأسطر */}
                 <h2
-                  className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                  className={`text-3xl md:text-4xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                 >
                   {page.equipmentSectionTitles.equipmentMainTitle}
                 </h2>
                 <div
-                  className={`prose prose-lg dark:prose-invert max-w-none [&_p]:text-text-secondary ${isRTL ? "[&_p]:font-almarai-regular" : "[&_p]:font-normal"}`}
+                  className={`prose prose-lg dark:prose-invert max-w-none [&_p]:text-text-secondary ${isRTL ? "[&_p]:font-arabic" : "[&_p]:font-normal"}`}
                   dangerouslySetInnerHTML={{ __html: page.equipmentSectionTitles.equipmentSubtitle || '' }}
                 />
               </motion.div>
@@ -591,12 +581,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               viewport={{ once: true }}
             >
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.qualityPolicySection.qualityTitle}
               </h2>
               <p
-                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-almarai-regular" : "font-normal"}`}
+                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-arabic" : "font-normal"}`}
               >
                 {page.qualityPolicySection.qualityContent}
               </p>
@@ -616,7 +606,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                   variants={fadeInUp}
                 >
                   <CheckCircle className="w-6 h-6 text-accent" />
-                  <span className={`text-text-secondary ${isRTL ? "font-almarai-regular" : "font-normal"}`}>{commitment}</span>
+                  <span className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>{commitment}</span>
                 </motion.li>
               ))}
             </motion.ul>
@@ -633,12 +623,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               viewport={{ once: true }}
             >
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.portfolioSectionTitle.portfolioTitle}
               </h2>
               <p
-                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-almarai-regular" : "font-normal"}`}
+                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-arabic" : "font-normal"}`}
               >
                 {page.portfolioSectionTitle.portfolioSubtitle}
               </p>
@@ -661,7 +651,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 1, delay: 0.5 }}
               viewport={{ once: true }}
             >
-              <p className={`text-sm text-text-secondary/70 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+              <p className={`text-sm text-text-secondary/70 ${isRTL ? "font-arabic" : "font-normal"}`}>
                 {isRTL
                   ? "قم بالتمرير لتدوير المعرض واستكشاف أعمالنا"
                   : "Scroll to rotate the gallery and explore our work"}
@@ -670,7 +660,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           </div>
         </section>
 
-        {/* <<< 6. تم إضافة المكون الجديد هنا في مكانه الصحيح >>> */}
         {brandStatementData && (
           <BrandStatementSection
             sideTitle={brandStatementData.sideTitle}
@@ -679,6 +668,13 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             isRTL={isRTL}
           />
         )}
+        
+        {/* ✨ التعديل الأول: تم نقل قسم الاعتمادات إلى هنا */}
+        <AccreditationsSection
+          title={page.accreditationsSection.accreditationsTitle}
+          subtitle={page.accreditationsSection.accreditationsSubtitle}
+          galleryHtml={page.accreditationsSection.accreditationsGallery}
+        />
 
         <section id="contact" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -690,12 +686,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               viewport={{ once: true }}
             >
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}
+                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.contactInfo.contactSectionTitle}
               </h2>
               <p
-                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-almarai-regular" : "font-normal"}`}
+                className={`text-lg leading-relaxed text-text-secondary mb-8 ${isRTL ? "font-arabic" : "font-normal"}`}
               >
                 {page.contactInfo.contactSectionSubtitle}
               </p>
@@ -711,7 +707,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               >
                 <form className="space-y-6">
                   <div>
-                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {t.contact.form.name}
                     </label>
                     <input
@@ -721,7 +717,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     />
                   </div>
                   <div>
-                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {t.contact.form.email}
                     </label>
                     <input
@@ -731,7 +727,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     />
                   </div>
                   <div>
-                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {t.contact.form.phone}
                     </label>
                     <input
@@ -741,7 +737,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     />
                   </div>
                   <div>
-                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                    <label className={`block text-text-secondary mb-2 ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {t.contact.form.message}
                     </label>
                     <textarea
@@ -767,31 +763,31 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 viewport={{ once: true }}
               >
                 <div className="bg-background-secondary p-8 rounded-2xl border border-border">
-                  <h3 className={`text-2xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+                  <h3 className={`text-2xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                     {isRTL ? "معلومات التواصل" : "Contact Information"}
                   </h3>
                   <div className="space-y-4">
                     <div className="flex items-center space-x-4">
                       <Mail className="w-6 h-6 text-accent" />
-                      <span className={`text-text-secondary ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                      <span className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
                         {page.contactInfo.emailAddress}
                       </span>
                     </div>
                     <div className="flex items-center space-x-4">
                       <Phone className="w-6 h-6 text-accent" />
-                      <span className={`text-text-secondary ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                      <span className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
                         {page.contactInfo.phoneNumber}
                       </span>
                     </div>
                     <div className="flex items-center space-x-4">
                       <Building className="w-6 h-6 text-accent" />
-                      <span className={`text-text-secondary ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                      <span className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
                         {page.contactInfo.unifiedNumber}
                       </span>
                     </div>
                     <div className="flex items-center space-x-4">
                       <MapPin className="w-6 h-6 text-accent" />
-                      <span className={`text-text-secondary ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                      <span className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
                         {page.contactInfo.branchesAddress}
                       </span>
                     </div>
@@ -799,7 +795,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 </div>
 
                 <div className="bg-background-secondary p-8 rounded-2xl border border-border text-center">
-                  <h3 className={`text-xl font-bold text-text-primary mb-4 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+                  <h3 className={`text-xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                     {isRTL ? "المستندات الرسمية" : "Official Documents"}
                   </h3>
                   <div className="w-32 h-32 mx-auto mb-4 bg-white rounded-lg flex items-center justify-center p-2">
@@ -811,7 +807,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       />
                     )}
                   </div>
-                  <p className={`text-sm text-text-secondary/80 ${isRTL ? "font-almarai-regular" : "font-normal"}`}>
+                  <p className={`text-sm text-text-secondary/80 ${isRTL ? "font-arabic" : "font-normal"}`}>
                     {page.contactInfo.qrCodeText}
                   </p>
                 </div>

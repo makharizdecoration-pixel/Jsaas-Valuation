@@ -125,7 +125,7 @@ export const InteractiveServiceViewer: React.FC<InteractiveServiceViewerProps> =
             {subServices.map((service, index) => (
               // <<< تم التعديل هنا >>>
               <button key={index} onClick={() => handleSelectService(index)} className={`relative px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden ${index === activeIndex ? "bg-accent text-accent-text shadow-lg shadow-accent/25" : "bg-background-secondary text-text-secondary hover:bg-background-secondary/80"}`}>
-                 <span className={`relative z-10 font-bold ${isRTL ? 'font-almarai-bold' : 'font-bold'}`}>{service.title}</span>
+                 <span className={`relative z-10 font-bold ${isRTL ? 'font-arabic font-bold' : 'font-bold'}`}>{service.title}</span>
                  {index === activeIndex && ( <motion.div className="absolute bottom-0 left-0 right-0 h-full bg-jassas-accent-red" layoutId="active-service-pill" transition={{ type: "spring", stiffness: 200, damping: 25 }} /> )}
                  {index === activeIndex && ( <motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-white/50" initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: IMAGE_CHANGE_INTERVAL * (gallery.length - imageCounterRef.current) / 1000, ease: "linear" }} key={activeIndex} /> )}
               </button>
@@ -148,8 +148,8 @@ export const InteractiveServiceViewer: React.FC<InteractiveServiceViewerProps> =
             <div className={`flex flex-col justify-center min-h-[450px] p-4 ${isRTL ? 'md:order-first' : 'md:order-last'}`}>
                 <AnimatePresence mode="wait">
                 <motion.div key={activeIndex} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="w-full max-w-md mx-auto md:mx-0 text-center md:text-start">
-                    <h2 className={`text-2xl font-bold text-text-primary mb-4 ${isRTL ? 'font-almarai-bold' : 'font-bold'}`}>{activeSubService?.title}</h2>
-                    <div dir={isRTL ? "rtl" : "ltr"} className={`prose dark:prose-invert max-w-none ${isRTL ? 'font-almarai-regular' : 'font-normal'}`} dangerouslySetInnerHTML={{ __html: activeSubService?.subServiceDescription || '' }} />
+                    <h2 className={`text-2xl font-bold text-text-primary mb-4 ${isRTL ? 'font-arabic font-bold' : 'font-bold'}`}>{activeSubService?.title}</h2>
+                    <div dir={isRTL ? "rtl" : "ltr"} className={`prose dark:prose-invert max-w-none ${isRTL ? 'font-arabic' : 'font-normal'}`} dangerouslySetInnerHTML={{ __html: activeSubService?.subServiceDescription || '' }} />
                 </motion.div>
                 </AnimatePresence>
             </div>
@@ -175,7 +175,7 @@ export const InteractiveServiceViewer: React.FC<InteractiveServiceViewerProps> =
             <div className="flex flex-row gap-3 px-4">
                 {subServices.map((service, index) => (
                   <button key={index} onClick={() => handleSelectService(index)} className={`relative w-32 flex-shrink-0 px-4 py-3 rounded-lg text-center transition-all duration-300 border ${index === activeIndex ? 'bg-accent text-accent-text border-accent' : 'bg-background-secondary border-border'}`}>
-                    <h4 className={`text-sm font-bold ${isRTL ? 'font-almarai-bold' : 'font-bold'}`}>{service.title}</h4>
+                    <h4 className={`text-sm font-bold ${isRTL ? 'font-arabic font-bold' : 'font-bold'}`}>{service.title}</h4>
                     {index === activeIndex && (<motion.div className="absolute bottom-0 left-0 right-0 h-1 bg-accent-text" initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: IMAGE_CHANGE_INTERVAL * (gallery.length - imageCounterRef.current) / 1000, ease: "linear" }} key={activeIndex} />)}
                   </button>
                 ))}
@@ -184,8 +184,8 @@ export const InteractiveServiceViewer: React.FC<InteractiveServiceViewerProps> =
         <div className="w-full px-4 min-h-[150px] text-center">
           <AnimatePresence mode="wait">
               <motion.div key={activeIndex} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-                  <h2 className={`text-xl font-bold text-text-primary mb-3 ${isRTL ? 'font-almarai-bold' : 'font-bold'}`}>{activeSubService?.title}</h2>
-                  <div dir={isRTL ? "rtl" : "ltr"} className={`prose dark:prose-invert max-w-none mx-auto ${isRTL ? 'font-almarai-regular' : 'font-normal'}`} dangerouslySetInnerHTML={{ __html: activeSubService?.subServiceDescription || '' }} />
+                  <h2 className={`text-xl font-bold text-text-primary mb-3 ${isRTL ? 'font-arabic font-bold' : 'font-bold'}`}>{activeSubService?.title}</h2>
+                  <div dir={isRTL ? "rtl" : "ltr"} className={`prose dark:prose-invert max-w-none mx-auto ${isRTL ? 'font-arabic' : 'font-normal'}`} dangerouslySetInnerHTML={{ __html: activeSubService?.subServiceDescription || '' }} />
               </motion.div>
           </AnimatePresence>
         </div>

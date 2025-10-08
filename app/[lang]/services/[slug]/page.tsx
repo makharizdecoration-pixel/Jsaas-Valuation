@@ -129,7 +129,7 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
     const navItems = isRTL ? staticNavItems.ar : staticNavItems.en;
 
     return (
-        <div className={`min-h-screen bg-background text-text-primary ${isRTL ? "font-almarai-regular" : "font-sans"}`}>
+        <div className="min-h-screen bg-background text-text-primary">
             <Header 
                 logoUrl={siteOptionsFields.logo.node.sourceUrl}
                 logoAlt={siteOptionsFields.logo.node.altText || "Jassas Logo"}
@@ -141,12 +141,12 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
             <main className="pt-24 pb-16">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h1 className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-almarai-bold" : "font-bold"}`}>
+                        <h1 className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
                             {pageInfo.name}
                         </h1>
                         {pageInfo.serviceGroupFields?.categoryDescription && (
                             <div
-                                className={`max-w-3xl mx-auto text-lg leading-relaxed text-text-secondary prose dark:prose-invert ${isRTL ? "font-almarai-regular" : "font-normal"}`}
+                                className={`max-w-3xl mx-auto text-lg leading-relaxed text-text-secondary prose dark:prose-invert ${isRTL ? "font-arabic" : "font-normal"}`}
                                 dangerouslySetInnerHTML={{ __html: pageInfo.serviceGroupFields.categoryDescription }}
                             />
                         )}

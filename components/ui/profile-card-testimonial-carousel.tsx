@@ -116,20 +116,20 @@ export function TestimonialCarousel({ className, isRTL = false }: TestimonialCar
             >
               <div className="mb-6">
                 <h2
-                  className={`text-2xl font-bold text-white mb-2 font-almarai-bold ${isRTL ? "text-right" : "text-left"}`}
+                  className={`text-2xl  text-white mb-2 font-arabic font-bold ${isRTL ? "text-right" : "text-left"}`}
                 >
                   {currentTestimonial.name}
                 </h2>
 
                 <p
-                  className={`text-sm font-medium text-[#fd9a01] font-almarai-regular ${isRTL ? "text-right" : "text-left"}`}
+                  className={`text-sm font-medium text-[#fd9a01] font-arabic ${isRTL ? "text-right" : "text-left"}`}
                 >
                   {currentTestimonial.title}
                 </p>
               </div>
 
               <p
-                className={`text-zinc-200 text-base leading-relaxed mb-8 font-almarai-regular ${isRTL ? "text-right" : "text-left"}`}
+                className={`text-zinc-200 text-base leading-relaxed mb-8 font-arabic ${isRTL ? "text-right" : "text-left"}`}
               >
                 {currentTestimonial.description}
               </p>
@@ -190,19 +190,19 @@ export function TestimonialCarousel({ className, isRTL = false }: TestimonialCar
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
               <h2
-                className={`text-xl font-bold text-white mb-2 font-almarai-bold ${isRTL ? "text-right" : "text-center"}`}
+                className={`text-xl  text-white mb-2 font-arabic font-bold ${isRTL ? "text-right" : "text-center"}`}
               >
                 {currentTestimonial.name}
               </h2>
 
               <p
-                className={`text-sm font-medium text-[#fd9a01] mb-4 font-almarai-regular ${isRTL ? "text-right" : "text-center"}`}
+                className={`text-sm font-medium text-[#fd9a01] mb-4 font-arabic ${isRTL ? "text-right" : "text-center"}`}
               >
                 {currentTestimonial.title}
               </p>
 
               <p
-                className={`text-zinc-200 text-sm leading-relaxed mb-6 font-almarai-regular ${isRTL ? "text-right" : "text-center"}`}
+                className={`text-zinc-200 text-sm leading-relaxed mb-6 font-arabic ${isRTL ? "text-right" : "text-center"}`}
               >
                 {currentTestimonial.description}
               </p>

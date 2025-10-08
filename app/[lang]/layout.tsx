@@ -1,27 +1,36 @@
 // app/[lang]/layout.tsx
 
 import type { Metadata } from "next";
-import { Poppins, Almarai } from "next/font/google";
+import localFont from 'next/font/local'; 
 import "./globals.css";
-// تم تصحيح المسار هنا
-import { ThemeProvider } from "next-themes"; 
+import { ThemeProvider } from "@/components/theme-provider";
 import ClientLayout from "./ClientLayout";
 
-const almarai = Almarai({
-  subsets: ["arabic"],
-  weight: ["300", "400", "700", "800"],
-  variable: "--font-almarai",
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-poppins",
+const loewNextArabic = localFont({
+  src: [
+    {
+      path: '../fonts/ArbFONTS-Loew-Next-Arabic-Light.woff2',
+      weight: '300',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/ArbFONTS-Loew-Next-Arabic-Medium.woff2',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/ArbFONTS-Loew-Next-Arabic-Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-arabic',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Jasas Group",
-  description: "High-end furniture and decor manufacturer",
+  title: "مجموعة جساس للمقاولات | Jassas Contracting Group",
+  description: "رواد في قطاع المقاولات والبنية التحتية في المملكة العربية السعودية",
 };
 
 export default function RootLayout({
@@ -31,9 +40,12 @@ export default function RootLayout({
   children: React.ReactNode;
   params: { lang: 'ar' | 'en' };
 }) {
+  const isRTL = params.lang === 'ar';
+  
   return (
-    <html lang={params.lang} dir={params.lang === 'ar' ? 'rtl' : 'ltr'} className={`${almarai.variable} ${poppins.variable}`} suppressHydrationWarning>
-      <body>
+    <html lang={params.lang} dir={isRTL ? 'rtl' : 'ltr'} className={`${loewNextArabic.variable}`} suppressHydrationWarning>
+      {/* === التعديل هنا === */}
+      <body className="font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

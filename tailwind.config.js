@@ -33,8 +33,11 @@ module.exports = {
         "accent-text": "var(--color-accent-text)",
       },
       fontFamily: {
-        "almarai-regular": ["var(--font-almarai-regular)", "system-ui"],
-        "almarai-bold": ["var(--font-almarai-bold)", "system-ui"],
+        // === التعديل هنا ===
+        // اجعل الخط الافتراضي sans يستخدم متغير الخط المخصص
+        sans: ["var(--font-arabic)", "system-ui", "sans-serif"],
+        // يمكنك إبقاء هذا السطر أو حذفه، لأن sans أصبح يقوم بنفس الوظيفة
+        arabic: ["var(--font-arabic)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
@@ -48,7 +51,6 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        // زدنا المدة لتناسب عدد الصور الكبير
         "scroll": "scroll 80s linear infinite",
       },
     },
