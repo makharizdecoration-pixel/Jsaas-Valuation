@@ -117,7 +117,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
     
     try {
       // استخدم متغير البيئة هنا
-      const response = await fetch(`${process.env.NEXT_PUBLIC_WP_URL}/wp-json/contact-form-7/v1/contact-forms/96d12fa/feedback`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/contact-form-7/v1/contact-forms/96d12fa/feedback`, {
         method: 'POST',
         body: formData,
       });
