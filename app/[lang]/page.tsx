@@ -1,10 +1,10 @@
 // app/[lang]/page.tsx
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, FormEvent } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Globe, Eye, Target, Heart, CheckCircle, Mail, Phone, Building, MapPin, QrCode, ArrowUp } from "lucide-react";
+import { Menu, X, Globe, Eye, Target, Heart, CheckCircle, Mail, Phone, Building, MapPin, QrCode, ArrowUp, Loader2 } from "lucide-react";
 import { parse } from 'node-html-parser';
 import { ThemeToggleButton } from "@/components/ui/theme-toggle-button";
 import { HeroSlider, type Slide } from "@/components/ui/HeroSlider";
@@ -14,7 +14,6 @@ import { DivisionsSection } from "@/components/sections/DivisionsSection";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BrandStatementSection } from "@/components/sections/BrandStatementSection";
-
 
 // DYNAMIC IMPORTS
 const ImageSwiper = dynamic(() => import("@/components/ui/image-swiper").then(mod => mod.ImageSwiper), { ssr: false, loading: () => <div className="w-full h-full min-h-[400px] bg-background-secondary rounded-lg animate-pulse" /> });
@@ -82,27 +81,61 @@ interface PageData {
 }
 
 const staticNavItems = {
-  ar: {
-    nav: { items: [{ label: "الرئيس التنفيذي", href: "#ceo" }, { label: "من نحن", href: "#about" }, { label: "خدماتنا", href: "#services" }, { label: "أقسامنـا", href: "#divisions" }, { label: "لماذا نحن", href: "#whyus" }, { label: "معداتنا", href: "#equipment" }, { label: "سياسة الجودة", href: "#quality" }, { label: "معرض الأعمال", href: "#portfolio" }, { label: "تواصل معنا", href: "#contact" }] },
-    contact: { title: "تواصل معنا", form: { name: "الاسم", email: "البريد الإلكتروني", phone: "رقم الهاتف", message: "الرسالة", submit: "إرسال" } },
-  },
-  en: {
-    nav: { items: [{ label: "CEO", href: "#ceo" }, { label: "About Us", href: "#about" }, { label: "Services", href: "#services" }, { label: "Divisions", href: "#divisions" }, { label: "Why Us", href: "#whyus" }, { label: "Equipment", href: "#equipment" }, { label: "Quality Policy", href: "#quality" }, { label: "Portfolio", href: "#portfolio" }, { label: "Contact Us", href: "#contact" }] },
-    contact: { title: "Contact Us", form: { name: "Name", email: "Email", phone: "Phone", message: "Message", submit: "Send" } },
-  }
+    ar: {
+      nav: { items: [{ label: "الرئيس التنفيذي", href: "#ceo" }, { label: "من نحن", href: "#about" }, { label: "خدماتنا", href: "#services" }, { label: "أقسامنـا", href: "#divisions" }, { label: "لماذا نحن", href: "#whyus" }, { label: "معداتنا", href: "#equipment" }, { label: "سياسة الجودة", href: "#quality" }, { label: "معرض الأعمال", href: "#portfolio" }, { label: "تواصل معنا", href: "#contact" }] },
+      contact: { title: "تواصل معنا", form: { name: "الاسم", email: "البريد الإلكتروني", phone: "رقم الهاتف", message: "الرسالة", submit: "إرسال", submitting: "جاري الإرسال...", success: "شكرًا لك! تم استلام رسالتك بنجاح.", error: "حدث خطأ. الرجاء المحاولة مرة أخرى." } },
+    },
+    en: {
+      nav: { items: [{ label: "CEO", href: "#ceo" }, { label: "About Us", href: "#about" }, { label: "Services", href: "#services" }, { label: "Divisions", href: "#divisions" }, { label: "Why Us", href: "#whyus" }, { label: "Equipment", href: "#equipment" }, { label: "Quality Policy", href: "#quality" }, { label: "Portfolio", href: "#portfolio" }, { label: "Contact Us", href: "#contact" }] },
+      contact: { title: "Contact Us", form: { name: "Name", email: "Email", phone: "Phone", message: "Message", submit: "Send", submitting: "Sending...", success: "Thank you! Your message has been received.", error: "An error occurred. Please try again." } },
+    }
 };
 
 export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [activeDivision, setActiveDivision] = useState(0);
+
+  const [formState, setFormState] = useState({ name: '', email: '', phone: '', message: '' });
+  const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
   const { lang } = params;
   const isRTL = lang === 'ar';
   const t = staticNavItems[lang] || staticNavItems.ar;
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmissionStatus('submitting');
+
+    const formData = new FormData();
+    // تأكد من أن أسماء الحقول هنا تطابق تمامًا الأسماء في فورم CF7
+    formData.append('your-name', formState.name);
+    formData.append('your-email', formState.email);
+    formData.append('your-phone', formState.phone); // افترضت أن اسم الحقل هو your-phone
+    formData.append('your-message', formState.message);
+    
+    try {
+      // استخدم متغير البيئة هنا
+      const response = await fetch(`${process.env.NEXT_PUBLIC_WP_URL}/wp-json/contact-form-7/v1/contact-forms/96d12fa/feedback`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'mail_sent') {
+        setSubmissionStatus('success');
+        setFormState({ name: '', email: '', phone: '', message: '' });
+      } else {
+        console.error('CF7 Submission Error:', result.message);
+        setSubmissionStatus('error');
+      }
+    } catch (error) {
+      console.error('Fetch Error:', error);
+      setSubmissionStatus('error');
+    }
+  };
 
   useEffect(() => {
     async function fetchAllData() {
@@ -118,20 +151,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           body: JSON.stringify({
             query: `
                 query GetEverything($language: LanguageCodeFilterEnum!, $pageId: ID!) {
-                  heroSlides(first: 5, where: {language: $language}) {
-                    nodes {
-                      title
-                      heroSlideacf {
-                        subtitle
-                        image {
-                          node {
-                            sourceUrl
-                            altText
-                          }
-                        }
-                      }
-                    }
-                  }
+                  heroSlides(first: 5, where: {language: $language}) { nodes { title heroSlideacf { subtitle image { node { sourceUrl altText } } } } }
                   page(id: $pageId, idType: DATABASE_ID) {
                     homepageCeo { ceoSectionTitle ceoName ceoMessage ceoJobTitle ceoImage { node { sourceUrl altText } } }
                     aboutUs { aboutSectionTitle aboutSectionContent visionTitle visionContent missionTitle missionContent valuesTitle valuesContent vision2030Image { node { sourceUrl altText } } vision2030Title vision2030Tagline }
@@ -147,17 +167,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
                     brandStatementSection { sideTitle paragraphs quote }
                   }
-                  services(first: 10, where: {language: $language}) { 
-                    nodes { 
-                      id 
-                      title(format: RENDERED) 
-                      slug 
-                      serviceDetails { 
-                        serviceDescription 
-                        serviceImage { node { sourceUrl altText } } 
-                      } 
-                    } 
-                  }
+                  services(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) slug serviceDetails { serviceDescription serviceImage { node { sourceUrl altText } } } } }
                   divisions(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) content(format: RENDERED) divisionDetails { divisionIcon } } }
                   portfolioItems(first: 20, where: {language: $language}) { nodes { id title portfolioItemDetails { commonText binomialText photo { node { sourceUrl altText } } } } }
                 }
@@ -446,7 +456,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.div>
           </div>
         </section>
-
+        
         <section id="services" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -478,7 +488,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           mainTitle={page.divisionsSectionTitles.divisionsMainTitle}
           subtitle={page.divisionsSectionTitles.divisionsSubtitle}
         />
-
 
         <section id="whyus" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -556,7 +565,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                {/* ✨ التعديل الثاني: تم تصغير حجم الخط وزيادة تباعد الأسطر */}
                 <h2
                   className={`text-3xl md:text-4xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                 >
@@ -668,8 +676,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             isRTL={isRTL}
           />
         )}
-        
-        {/* ✨ التعديل الأول: تم نقل قسم الاعتمادات إلى هنا */}
+
         <AccreditationsSection
           title={page.accreditationsSection.accreditationsTitle}
           subtitle={page.accreditationsSection.accreditationsSubtitle}
@@ -705,15 +712,19 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
               >
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label className={`block text-text-secondary mb-2 ${isRTL ? "font-arabic" : "font-normal"}`}>
                       {t.contact.form.name}
                     </label>
                     <input
                       type="text"
+                      name="your-name"
                       className="w-full px-4 py-3 bg-background border border-border rounded-lg text-text-primary focus:border-accent focus:outline-none transition-colors"
                       placeholder={t.contact.form.name}
+                      value={formState.name}
+                      onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                      required
                     />
                   </div>
                   <div>
@@ -722,8 +733,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     </label>
                     <input
                       type="email"
+                      name="your-email"
                       className="w-full px-4 py-3 bg-background border border-border rounded-lg text-text-primary focus:border-accent focus:outline-none transition-colors"
                       placeholder={t.contact.form.email}
+                      value={formState.email}
+                      onChange={(e) => setFormState({ ...formState, email: e.target.value })}
+                      required
                     />
                   </div>
                   <div>
@@ -732,8 +747,12 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     </label>
                     <input
                       type="tel"
+                      name="your-phone"
                       className="w-full px-4 py-3 bg-background border border-border rounded-lg text-text-primary focus:border-accent focus:outline-none transition-colors"
                       placeholder={t.contact.form.phone}
+                      value={formState.phone}
+                      onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
+                      required
                     />
                   </div>
                   <div>
@@ -741,17 +760,43 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       {t.contact.form.message}
                     </label>
                     <textarea
+                      name="your-message"
                       rows={5}
                       className="w-full px-4 py-3 bg-background border border-border rounded-lg text-text-primary focus:border-accent focus:outline-none transition-colors resize-none"
                       placeholder={t.contact.form.message}
+                      value={formState.message}
+                      onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+                      required
                     ></textarea>
                   </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-accent text-accent-text py-3 px-6 rounded-lg hover:bg-accent/90 transition-colors font-semibold"
-                  >
-                    {t.contact.form.submit}
-                  </button>
+                  
+                  {(submissionStatus === 'idle' || submissionStatus === 'submitting') && (
+                    <button
+                      type="submit"
+                      disabled={submissionStatus === 'submitting'}
+                      className="w-full bg-accent text-accent-text py-3 px-6 rounded-lg hover:bg-accent/90 transition-colors font-semibold flex items-center justify-center disabled:opacity-50"
+                    >
+                      {submissionStatus === 'submitting' ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t.contact.form.submitting}
+                        </>
+                      ) : (
+                        t.contact.form.submit
+                      )}
+                    </button>
+                  )}
+
+                  {submissionStatus === 'success' && (
+                    <div className="text-green-700 bg-green-100 p-4 rounded-lg text-center font-semibold">
+                      {t.contact.form.success}
+                    </div>
+                  )}
+                  {submissionStatus === 'error' && (
+                     <div className="text-red-700 bg-red-100 p-4 rounded-lg text-center font-semibold">
+                      {t.contact.form.error}
+                    </div>
+                  )}
                 </form>
               </motion.div>
 
