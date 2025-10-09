@@ -18,7 +18,7 @@ interface DivisionsSectionProps {
   subtitle?: string;
 }
 
-// استخلاص أول صورة من HTML
+// استخلاص أول صورة من HTML (تبقى كما هي)
 const extractFirstImageUrl = (htmlContent: string): string => {
   if (!htmlContent) return '/placeholder.jpg';
   const root = parse(htmlContent);
@@ -26,14 +26,23 @@ const extractFirstImageUrl = (htmlContent: string): string => {
   return firstImage?.getAttribute('src') || '/placeholder.jpg';
 };
 
-// استخلاص النص فقط
-const extractTextContent = (htmlContent: string): string => {
+// ✨ تم تعديل هذه الدالة لتزيل الصورة الأولى ومعرض الصور ✨
+const getRenderableContentHtml = (htmlContent: string): string => {
   if (!htmlContent) return '';
   const root = parse(htmlContent);
+
+  // الخطوة 1: ابحث عن الصورة الأولى (الشعار) وقم بحذفها من المحتوى
+  const firstImage = root.querySelector('img');
+  if (firstImage) firstImage.remove();
+
+  // الخطوة 2: ابحث عن معرض الصور وقم بحذفه
   const gallery = root.querySelector('.wp-block-gallery');
   if (gallery) gallery.remove();
-  return root.textContent.trim();
+
+  // إرجاع باقي المحتوى الذي هو الآن النص المنسق فقط
+  return root.innerHTML;
 };
+
 
 // حساب المسافة بين الصور
 function calculateGap(width: number) {
@@ -177,9 +186,7 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
               ))}
             </div>
 
-            {/* ✨ التعديل: تم تغيير هيكل هذا الجزء بالكامل */}
             <div className="flex flex-col justify-between min-h-[350px]">
-              {/* حاوية المحتوى العلوي */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeIndex}
@@ -195,18 +202,15 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                     {activeDivision.title}
                   </h3>
                   
-                  {/* ✨ 1. تم حذف العنوان الفرعي من هنا */}
-                  
-                  {/* حاوية للنص مع تحديد عدد الأسطر لمنع الاهتزاز */}
                   <div className="min-h-[120px]">
-                    <p className={`text-text-secondary leading-relaxed text-lg line-clamp-4 ${isRTL ? "font-arabic" : "font-normal"}`}>
-                      {extractTextContent(activeDivision.content)}
-                    </p>
+                    <div
+                        className={`prose dark:prose-invert max-w-none text-text-secondary leading-relaxed text-lg ${isRTL ? "font-arabic" : "font-normal"}`}
+                        dangerouslySetInnerHTML={{ __html: getRenderableContentHtml(activeDivision.content) }}
+                    />
                   </div>
                 </motion.div>
               </AnimatePresence>
 
-              {/* ✨ 2. حاوية الأسهم السفلية */}
               <div className="flex items-center gap-6 mt-auto">
                 <button
                   onClick={handlePrev}

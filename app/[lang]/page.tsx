@@ -529,55 +529,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.ul>
           </div>
         </section>
-
-        <section id="equipment" className="py-20 bg-background-secondary/30">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <motion.div
-              className="grid lg:grid-cols-2 gap-12 items-center"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <motion.div
-                className="relative flex justify-center"
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                viewport={{ once: true }}
-              >
-                <Suspense fallback={<div className="w-[320px] h-[400px] bg-background-secondary rounded-lg animate-pulse"></div>}>
-                  <EquipmentImageSwiper
-                    images={equipmentImageUrls.join(",")}
-                    cardWidth={320}
-                    cardHeight={400}
-                    autoAdvanceDelay={3000}
-                    className="mx-auto"
-                  />
-                </Suspense>
-              </motion.div>
-
-              <motion.div
-                className={`${isRTL ? "text-right" : "text-left"}`}
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                viewport={{ once: true }}
-              >
-                <h2
-                  className={`text-3xl md:text-4xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
-                >
-                  {page.equipmentSectionTitles.equipmentMainTitle}
-                </h2>
-                <div
-                  className={`prose prose-lg dark:prose-invert max-w-none [&_p]:text-text-secondary ${isRTL ? "[&_p]:font-arabic" : "[&_p]:font-normal"}`}
-                  dangerouslySetInnerHTML={{ __html: page.equipmentSectionTitles.equipmentSubtitle || '' }}
-                />
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
+        
         <section id="quality" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -588,7 +540,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               viewport={{ once: true }}
             >
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                className={`text-3xl md:text-4xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.qualityPolicySection.qualityTitle}
               </h2>
@@ -619,8 +571,8 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.ul>
           </div>
         </section>
-
-        <section id="portfolio" className="py-20 bg-background-secondary/30">
+        
+        <section id="portfolio" className="py-20 bg-background-secondary/30 hidden">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
               className="text-center mb-16"
@@ -675,6 +627,55 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             isRTL={isRTL}
           />
         )}
+
+        <section id="equipment" className="py-20 bg-background-secondary/30">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="grid lg:grid-cols-2 gap-12 items-center"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <motion.div
+                className="relative flex justify-center"
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                <Suspense fallback={<div className="w-[320px] h-[400px] bg-background-secondary rounded-lg animate-pulse"></div>}>
+                  <EquipmentImageSwiper
+                    images={equipmentImageUrls.join(",")}
+                    cardWidth={320}
+                    cardHeight={400}
+                    autoAdvanceDelay={3000}
+                    className="mx-auto"
+                  />
+                </Suspense>
+              </motion.div>
+
+              <motion.div
+                className={`${isRTL ? "text-right" : "text-left"}`}
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                viewport={{ once: true }}
+              >
+                {/* ✨ تم تعديل حجم العنوان هنا ✨ */}
+                <h2
+                  className={`text-2xl md:text-3xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                >
+                  {page.equipmentSectionTitles.equipmentMainTitle}
+                </h2>
+                <div
+                  className={`prose prose-lg dark:prose-invert max-w-none [&_p]:text-text-secondary ${isRTL ? "[&_p]:font-arabic" : "[&_p]:font-normal"}`}
+                  dangerouslySetInnerHTML={{ __html: page.equipmentSectionTitles.equipmentSubtitle || '' }}
+                />
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
 
         <AccreditationsSection
           title={page.accreditationsSection.accreditationsTitle}
