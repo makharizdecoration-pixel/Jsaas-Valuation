@@ -170,7 +170,6 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   key={division.id}
                   src={extractFirstImageUrl(division.content)}
                   alt={division.title}
-                  // <<< تم التعديل هنا: تصغير حجم الصور من 10/12 إلى 9/12 >>>
                   className="absolute w-9/12 h-9/12 object-cover rounded-3xl shadow-2xl cursor-pointer"
                   style={getImageStyle(index)}
                   onClick={() => setActiveIndex(index)}
@@ -178,8 +177,9 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
               ))}
             </div>
 
-            {/* المحتوى النصي */}
-            <div className="flex flex-col justify-between">
+            {/* ✨ التعديل: تم تغيير هيكل هذا الجزء بالكامل */}
+            <div className="flex flex-col justify-between min-h-[350px]">
+              {/* حاوية المحتوى العلوي */}
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeIndex}
@@ -190,31 +190,24 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   <h3 
-                    className={`text-3xl font-bold text-text-primary mb-2 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                    className={`text-3xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                   >
                     {activeDivision.title}
                   </h3>
-                  <p className={`text-text-secondary mb-6 ${isRTL ? "font-arabic" : "font-normal"}`}>
-                    {isRTL ? "قسم من أقسامنا" : "A Division of Ours"}
-                  </p>
-                  <motion.p className={`text-text-secondary leading-relaxed text-lg ${isRTL ? "font-arabic" : "font-normal"}`}>
-                    {extractTextContent(activeDivision.content).split(" ").map((word, i) => (
-                      <motion.span
-                        key={i}
-                        initial={{ filter: "blur(10px)", opacity: 0, y: 5 }}
-                        animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
-                        transition={{ duration: 0.22, ease: "easeInOut", delay: 0.025 * i }}
-                        style={{ display: "inline-block" }}
-                      >
-                        {word}&nbsp;
-                      </motion.span>
-                    ))}
-                  </motion.p>
+                  
+                  {/* ✨ 1. تم حذف العنوان الفرعي من هنا */}
+                  
+                  {/* حاوية للنص مع تحديد عدد الأسطر لمنع الاهتزاز */}
+                  <div className="min-h-[120px]">
+                    <p className={`text-text-secondary leading-relaxed text-lg line-clamp-4 ${isRTL ? "font-arabic" : "font-normal"}`}>
+                      {extractTextContent(activeDivision.content)}
+                    </p>
+                  </div>
                 </motion.div>
               </AnimatePresence>
 
-              {/* أزرار التنقل */}
-              <div className="flex items-center gap-6 mt-8">
+              {/* ✨ 2. حاوية الأسهم السفلية */}
+              <div className="flex items-center gap-6 mt-auto">
                 <button
                   onClick={handlePrev}
                   onMouseEnter={() => setHoverPrev(true)}

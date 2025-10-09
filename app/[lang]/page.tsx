@@ -109,15 +109,14 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
     setSubmissionStatus('submitting');
 
     const formData = new FormData();
-    // تأكد من أن أسماء الحقول هنا تطابق تمامًا الأسماء في فورم CF7
     formData.append('your-name', formState.name);
     formData.append('your-email', formState.email);
-    formData.append('your-phone', formState.phone); // افترضت أن اسم الحقل هو your-phone
+    formData.append('your-phone', formState.phone);
     formData.append('your-message', formState.message);
     
     try {
-      // استخدم متغير البيئة هنا
-      const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/contact-form-7/v1/contact-forms/96d12fa/feedback`, {
+      // ✨ ✨ ✨ تم استخدام الرقم الصحيح هنا ✨ ✨ ✨
+      const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/contact-form-7/v1/contact-forms/968/feedback`, {
         method: 'POST',
         body: formData,
       });

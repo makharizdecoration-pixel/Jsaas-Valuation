@@ -7,11 +7,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-// <<< 1. تم تعديل الواجهة هنا >>>
 interface Service {
   id: string;
   title: string;
-  slug: string; // تمت إضافة slug
+  slug: string;
   serviceDetails: {
     serviceDescription: string;
     serviceImage?: {
@@ -26,14 +25,13 @@ interface Service {
 interface ServicesSectionProps {
   services: Service[];
   className?: string;
-  lang: 'ar' | 'en'; // تمت إضافة اللغة
+  lang: 'ar' | 'en';
 }
 
 const AUTOPLAY_DELAY = 5000;
 
 export function ServicesSection({ services, className, lang }: ServicesSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  // <<< 2. تم تعديل طريقة تحديد اللغة هنا >>>
   const isRTL = lang === 'ar';
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -117,35 +115,39 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
             </AnimatePresence>
           </div>
 
-          <div className='bg-background dark:bg-card rounded-3xl shadow-2xl p-8 -ms-[80px] me-auto max-w-lg flex-1 z-10'>
-            <AnimatePresence mode='wait'>
-              <motion.div
-                key={currentService.id + 'text'}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
-                <h2 className='text-2xl font-arabic font-bold text-text-primary mb-4'>
-                  {currentService.title}
-                </h2>
-                <div className="min-h-[140px] mb-6">
-                   <p className='text-text-secondary text-base leading-relaxed whitespace-pre-wrap'>
-                      {currentService.serviceDetails.serviceDescription}
-                   </p>
-                </div>
-                {/* <<< 3. تمت إضافة زر "اقرأ المزيد" هنا >>> */}
-                <div className="mt-4">
-                  <Link href={`/${lang}/services/${currentService.slug}`}>
-                    <span className="inline-block bg-accent text-accent-text font-bold py-2 px-6 rounded-lg hover:bg-accent/90 transition-colors">
-                      {isRTL ? "اقرأ المزيد" : "Read More"}
-                    </span>
-                  </Link>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+          {/* === تم تطبيق جميع التعديلات هنا === */}
+          <div className='bg-background dark:bg-card rounded-3xl shadow-2xl p-8 -ms-[120px] me-auto max-w-lg flex-1 z-10 flex flex-col justify-between min-h-[384px]'>
+            {/* 1. حاوية للمحتوى العلوي */}
+            <div>
+              <AnimatePresence mode='wait'>
+                <motion.div
+                  key={currentService.id + 'text'}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                >
+                  <h2 className='text-2xl font-arabic font-bold text-text-primary mb-4'>
+                    {currentService.title}
+                  </h2>
+                  <div className="mb-6">
+                     <p className='text-text-secondary text-base leading-relaxed whitespace-pre-wrap line-clamp-4'>
+                        {currentService.serviceDetails.serviceDescription}
+                     </p>
+                  </div>
+                  <div className="mt-4">
+                    <Link href={`/${lang}/services/${currentService.slug}`}>
+                      <span className="inline-block bg-accent text-accent-text font-bold py-2 px-6 rounded-lg hover:bg-accent/90 transition-colors">
+                        {isRTL ? "اقرأ المزيد" : "Read More"}
+                      </span>
+                    </Link>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-            <div className='flex items-center gap-4 pt-4 mt-4 border-t border-border/40'>
+            {/* 2. حاوية المحتوى السفلي (الأسهم) */}
+            <div className='flex items-center gap-4 pt-4 mt-auto border-t border-border/40'>
               <button
                 onClick={handlePrevious}
                 aria-label='Previous service'
@@ -165,6 +167,7 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
         </motion.div>
       </div>
 
+      {/* لم يتم تغيير أي شيء في نسخة الجوال */}
       <div className='md:hidden max-w-sm mx-auto text-center'>
         <div className='w-full aspect-square bg-background-secondary rounded-3xl overflow-hidden mb-6 shadow-lg'>
           <AnimatePresence mode='wait'>
@@ -203,7 +206,6 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
                   {currentService.serviceDetails.serviceDescription}
                 </p>
               </div>
-              {/* <<< 3. تمت إضافة زر "اقرأ المزيد" هنا >>> */}
               <div className="mt-4">
                 <Link href={`/${lang}/services/${currentService.slug}`}>
                   <span className="inline-block bg-accent text-accent-text font-bold py-2 px-6 rounded-lg hover:bg-accent/90 transition-colors">
