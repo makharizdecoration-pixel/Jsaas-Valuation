@@ -114,10 +114,8 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
               </motion.div>
             </AnimatePresence>
           </div>
-
-          {/* === تم تطبيق جميع التعديلات هنا === */}
+          
           <div className='bg-background dark:bg-card rounded-3xl shadow-2xl p-8 -ms-[120px] me-auto max-w-lg flex-1 z-10 flex flex-col justify-between min-h-[384px]'>
-            {/* 1. حاوية للمحتوى العلوي */}
             <div>
               <AnimatePresence mode='wait'>
                 <motion.div
@@ -145,8 +143,7 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
                 </motion.div>
               </AnimatePresence>
             </div>
-
-            {/* 2. حاوية المحتوى السفلي (الأسهم) */}
+            
             <div className='flex items-center gap-4 pt-4 mt-auto border-t border-border/40'>
               <button
                 onClick={handlePrevious}
@@ -167,7 +164,7 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
         </motion.div>
       </div>
 
-      {/* لم يتم تغيير أي شيء في نسخة الجوال */}
+      {/* === تم تطبيق التعديلات هنا في نسخة الجوال === */}
       <div className='md:hidden max-w-sm mx-auto text-center'>
         <div className='w-full aspect-square bg-background-secondary rounded-3xl overflow-hidden mb-6 shadow-lg'>
           <AnimatePresence mode='wait'>
@@ -201,8 +198,10 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
               <h2 className='text-xl font-arabic font-bold text-text-primary mb-4'>
                 {currentService.title}
               </h2>
-              <div className="min-h-[120px] mb-6">
-                <p className='text-text-secondary text-sm leading-relaxed whitespace-pre-wrap'>
+              {/* 1. تم تغيير الارتفاع إلى ثابت */}
+              {/* 2. تم إضافة line-clamp للنص */}
+              <div className="h-[120px] mb-6">
+                <p className='text-text-secondary text-sm leading-relaxed whitespace-pre-wrap line-clamp-5'>
                   {currentService.serviceDetails.serviceDescription}
                 </p>
               </div>

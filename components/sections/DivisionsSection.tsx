@@ -18,7 +18,6 @@ interface DivisionsSectionProps {
   subtitle?: string;
 }
 
-// استخلاص أول صورة من HTML (تبقى كما هي)
 const extractFirstImageUrl = (htmlContent: string): string => {
   if (!htmlContent) return '/placeholder.jpg';
   const root = parse(htmlContent);
@@ -39,8 +38,6 @@ const getRenderableContentHtml = (htmlContent: string): string => {
   return root.innerHTML;
 };
 
-
-// حساب المسافة بين الصور
 function calculateGap(width: number) {
   const minWidth = 1024;
   const maxWidth = 1456;
@@ -68,14 +65,12 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
   const divisionsLength = useMemo(() => divisions.length, [divisions]);
   const activeDivision = useMemo(() => divisions[activeIndex], [activeIndex, divisions]);
 
-  // كشف الاتجاه
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsRTL(document.documentElement.dir === 'rtl');
     }
   }, []);
 
-  // حساب العرض
   useEffect(() => {
     function handleResize() {
       if (imageContainerRef.current) {
@@ -89,7 +84,6 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
     }
   }, []);
 
-  // التشغيل التلقائي
   useEffect(() => {
     autoplayIntervalRef.current = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % divisionsLength);
@@ -99,7 +93,6 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
     };
   }, [divisionsLength]);
 
-  // التنقل
   const handleNext = useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % divisionsLength);
     if (autoplayIntervalRef.current) clearInterval(autoplayIntervalRef.current);
@@ -110,14 +103,12 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
     if (autoplayIntervalRef.current) clearInterval(autoplayIntervalRef.current);
   }, [divisionsLength]);
 
-  // تحديد موقع كل صورة
   function getImageStyle(index: number): React.CSSProperties {
     const gap = calculateGap(containerWidth);
     const maxStickUp = gap * 0.8;
     const isActive = index === activeIndex;
     const isLeft = (activeIndex - 1 + divisionsLength) % divisionsLength === index;
     const isRight = (activeIndex + 1) % divisionsLength === index;
-
     const scale = isActive ? 1 : 0.85;
 
     let transform = `scale(${scale})`;
@@ -164,7 +155,6 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
 
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
-            {/* عارض الصور الدائري */}
             <div 
               ref={imageContainerRef}
               className="relative w-full aspect-square md:aspect-[4/3] flex items-center justify-center"
@@ -175,7 +165,8 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   key={division.id}
                   src={extractFirstImageUrl(division.content)}
                   alt={division.title}
-                  className="absolute w-9/12 h-9/12 object-cover rounded-3xl shadow-2xl cursor-pointer"
+                  // ✨ --- تم التعديل هنا: تصغير حجم الصورة --- ✨
+                  className="absolute w-8/12 h-8/12 object-cover rounded-3xl shadow-2xl cursor-pointer"
                   style={getImageStyle(index)}
                   onClick={() => setActiveIndex(index)}
                 />
@@ -192,14 +183,13 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   exit="exit"
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
-                  {/* ✨ تم تصغير حجم هذا العنوان درجة إضافية ✨ */}
                   <h3 
                     className={`text-xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                   >
                     {activeDivision.title}
                   </h3>
                   
-                  <div className="min-h-[120px]">
+                  <div className="h-[140px] overflow-y-auto hide-scrollbar">
                     <div
                         className={`prose dark:prose-invert max-w-none text-text-secondary leading-relaxed text-lg ${isRTL ? "font-arabic" : "font-normal"}`}
                         dangerouslySetInnerHTML={{ __html: getRenderableContentHtml(activeDivision.content) }}
