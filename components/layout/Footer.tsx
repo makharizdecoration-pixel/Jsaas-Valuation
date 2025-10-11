@@ -1,4 +1,4 @@
-// components/layout/Footer.tsx
+// components/layout/Footer.tsx 
 import Link from 'next/link';
 import { Download } from 'lucide-react';
 
