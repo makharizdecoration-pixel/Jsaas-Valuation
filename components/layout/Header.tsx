@@ -13,13 +13,12 @@ interface NavItem {
   href: string;
 }
 
-// <<< تم تحديث الواجهة هنا >>>
 interface HeaderProps {
   logoUrl: string;
   logoAlt: string;
   navItems: NavItem[];
   lang: 'ar' | 'en';
-  alternates?: Record<string, string>; // خاصية اختيارية لروابط اللغات
+  alternates?: Record<string, string>;
 }
 
 export function Header({ logoUrl, logoAlt, navItems, lang, alternates }: HeaderProps) {
@@ -27,36 +26,29 @@ export function Header({ logoUrl, logoAlt, navItems, lang, alternates }: HeaderP
   const pathname = usePathname();
   const isRTL = lang === "ar";
 
-  // <<< تم تعديل هذه الدالة بالكامل >>>
   const getSwitchedLanguagePath = () => {
     const newLang = lang === 'ar' ? 'en' : 'ar';
-    
-    // تحقق إذا كان هناك رابط ترجمة مباشر لهذه الصفحة
     if (alternates && alternates[newLang]) {
-      // إذا كان مسار الصفحة الحالية يحتوي على /services/، ابنِ الرابط الكامل
       if (pathname.includes('/services/')) {
         return `/${newLang}/services/${alternates[newLang]}`;
       }
-      // يمكنك إضافة شروط أخرى هنا لصفحات ديناميكية أخرى مستقبلاً
     }
-    
-    // إذا لم يكن هناك رابط ترجمة، استخدم الطريقة القديمة (تغيير اللغة في الرابط الحالي)
-    // هذا مناسب للصفحة الرئيسية والصفحات الثابتة
     if (pathname.startsWith(`/${lang}`)) {
       return pathname.replace(`/${lang}`, `/${newLang}`);
     }
-    
-    // كحل أخير، اذهب للصفحة الرئيسية باللغة الجديدة
     return `/${newLang}`;
   };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-jassas-footer-bg border-b-2 border-jassas-accent-red">
-      <div className="container mx-auto max-w-7xl h-16 flex items-center px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between w-full">
+      <div className="container mx-auto max-w-7xl h-16 px-4 sm:px-6 lg:px-8">
+        {/* ✨ 1. تم جعل هذه الحاوية relative لتكون مرجعًا للتوسيط المطلق */}
+        <div className="relative flex items-center justify-between w-full h-full">
+          
+          {/* --- الشعار --- */}
           <motion.div 
             className="flex-shrink-0" 
-            initial={{ opacity: 0, x: isRTL ? 20 : -20 }} 
+            initial={{ opacity: 0, x: isRTL ? 50 : -50 }} 
             animate={{ opacity: 1, x: 0 }} 
             transition={{ duration: 0.5 }}
           >
@@ -65,26 +57,29 @@ export function Header({ logoUrl, logoAlt, navItems, lang, alternates }: HeaderP
             </Link>
           </motion.div>
 
-          <div className="hidden lg:flex items-center justify-end flex-grow gap-6">
-            <div className={`flex items-center xl:space-x-8 lg:space-x-4 whitespace-nowrap ${isRTL ? "space-x-reverse" : ""}`}>
-              {navItems.map((item, index) => (
-                <motion.a
-                  key={item.href}
-                  href={`/${lang}${item.href}`}
-                  className="text-static-white hover:text-jassas-accent-red font-semibold transition-colors xl:text-base lg:text-sm"
-                  whileHover={{ y: -2 }}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  {item.label}
-                </motion.a>
-              ))}
-            </div>
-            <div className="flex items-center space-x-4 flex-shrink-0">
-              <Link href={getSwitchedLanguagePath()} passHref>
+          {/* ✨ 2. تم تعديل هذا الجزء بالكامل لتحقيق التوسيط الصحيح */}
+          {/* --- القائمة الرئيسية (لشاشات الحاسوب) --- */}
+          <nav className="hidden lg:flex items-center gap-x-8 whitespace-nowrap absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            {navItems.map((item, index) => (
+              <motion.a
+                key={item.label + index}
+                href={`${item.href.startsWith('#') ? '' : `/${lang}`}${item.href}`}
+                className={`text-static-white hover:text-jassas-accent-red transition-colors xl:text-base lg:text-sm ${isRTL ? 'font-arabic font-bold' : 'font-semibold'}`}
+                whileHover={{ y: -2 }}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                {item.label}
+              </motion.a>
+            ))}
+          </nav>
+
+          {/* --- الأزرار (لغة وثيم) --- */}
+          <div className="hidden lg:flex items-center gap-x-4">
+             <Link href={getSwitchedLanguagePath()} passHref>
                 <motion.div
-                  className="flex items-center space-x-2 px-3 py-1 rounded-lg font-semibold bg-jassas-accent-red text-static-white hover:bg-static-white hover:text-jassas-accent-red transition-colors cursor-pointer" 
+                  className="flex items-center gap-x-2 px-3 py-1 rounded-lg font-semibold bg-jassas-accent-red text-static-white hover:bg-static-white hover:text-jassas-accent-red transition-colors cursor-pointer" 
                   whileHover={{ scale: 1.05 }} 
                   whileTap={{ scale: 0.95 }}
                 >
@@ -93,9 +88,9 @@ export function Header({ logoUrl, logoAlt, navItems, lang, alternates }: HeaderP
                 </motion.div>
               </Link>
               <ThemeToggleButton />
-            </div>
           </div>
 
+          {/* --- أزرار الجوال --- */}
           <div className="lg:hidden flex items-center gap-4">
             <ThemeToggleButton />
             <motion.button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-static-white hover:opacity-80" whileTap={{ scale: 0.95 }}>
@@ -104,6 +99,8 @@ export function Header({ logoUrl, logoAlt, navItems, lang, alternates }: HeaderP
           </div>
         </div>
       </div>
+      
+      {/* --- قائمة الجوال المنسدلة --- */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
@@ -112,15 +109,20 @@ export function Header({ logoUrl, logoAlt, navItems, lang, alternates }: HeaderP
             animate={{ opacity: 1, height: "auto" }} 
             exit={{ opacity: 0, height: 0 }}
           >
-            <div className="px-4 py-2 space-y-2">
+            <div className={`px-4 py-2 space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
               {navItems.map((item) => (
-                <Link key={item.href} href={`/${lang}${item.href}`} className="block py-2 text-gray-600 dark:text-gray-300 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>
+                <Link 
+                  key={item.href} 
+                  href={`${item.href.startsWith('#') ? '' : `/${lang}`}${item.href}`} 
+                  className={`block py-2 text-gray-600 dark:text-gray-300 hover:text-accent transition-colors ${isRTL ? 'font-arabic font-bold' : 'font-semibold'}`} 
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   {item.label}
                 </Link>
               ))}
-              <Link href={getSwitchedLanguagePath()} className="flex items-center space-x-2 py-2 text-gray-600 dark:text-gray-300 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <Link href={getSwitchedLanguagePath()} className="flex items-center gap-x-2 py-2 text-gray-600 dark:text-gray-300 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>
                 <Globe className="w-4 h-4" />
-                <span>{lang === "ar" ? "English" : "العربية"}</span>
+                <span className={`${isRTL ? 'mr-2' : 'ml-2'}`}>{lang === "ar" ? "English" : "العربية"}</span>
               </Link>
             </div>
           </motion.div>

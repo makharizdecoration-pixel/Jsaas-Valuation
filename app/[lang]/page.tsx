@@ -20,6 +20,19 @@ const ImageSwiper = dynamic(() => import("@/components/ui/image-swiper").then(mo
 const CircularGallery = dynamic(() => import("@/components/ui/circular-gallery").then(mod => mod.CircularGallery), { ssr: false, loading: () => <div className="w-full h-[80vh] bg-background-secondary rounded-lg animate-pulse" /> });
 const EquipmentImageSwiper = dynamic(() => import("@/components/ui/equipment-image-swiper").then(mod => mod.EquipmentImageSwiper), { ssr: false, loading: () => <div className="w-[320px] h-[400px] bg-background-secondary rounded-lg animate-pulse" /> });
 
+interface MenuItem {
+  id: string;
+  label: string;
+  url: string;
+  path: string;
+}
+
+interface Menu {
+  menuItems: {
+    nodes: MenuItem[];
+  };
+}
+
 // TYPESCRIPT INTERFACES
 interface ImageNode { sourceUrl: string; altText: string; }
 interface SiteOptionsFields { logo: { node: ImageNode }; }
@@ -78,18 +91,9 @@ interface PageData {
   services: { nodes: Service[] };
   divisions: { nodes: Division[] };
   portfolioItems: { nodes: PortfolioItem[] };
+  headerMenu: Menu;
+  footerMenu: Menu;
 }
-
-const staticNavItems = {
-    ar: {
-      nav: { items: [{ label: "الرئيس التنفيذي", href: "#ceo" }, { label: "من نحن", href: "#about" }, { label: "خدماتنا", href: "#services" }, { label: "أقسامنـا", href: "#divisions" }, { label: "لماذا نحن", href: "#whyus" }, { label: "معداتنا", href: "#equipment" }, { label: "سياسة الجودة", href: "#quality" }, { label: "معرض الأعمال", href: "#portfolio" }, { label: "تواصل معنا", href: "#contact" }] },
-      contact: { title: "تواصل معنا", form: { name: "الاسم", email: "البريد الإلكتروني", phone: "رقم الهاتف", message: "الرسالة", submit: "إرسال", submitting: "جاري الإرسال...", success: "شكرًا لك! تم استلام رسالتك بنجاح.", error: "حدث خطأ. الرجاء المحاولة مرة أخرى." } },
-    },
-    en: {
-      nav: { items: [{ label: "CEO", href: "#ceo" }, { label: "About Us", href: "#about" }, { label: "Services", href: "#services" }, { label: "Divisions", href: "#divisions" }, { label: "Why Us", href: "#whyus" }, { label: "Equipment", href: "#equipment" }, { label: "Quality Policy", href: "#quality" }, { label: "Portfolio", href: "#portfolio" }, { label: "Contact Us", href: "#contact" }] },
-      contact: { title: "Contact Us", form: { name: "Name", email: "Email", phone: "Phone", message: "Message", submit: "Send", submitting: "Sending...", success: "Thank you! Your message has been received.", error: "An error occurred. Please try again." } },
-    }
-};
 
 export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
   const [pageData, setPageData] = useState<PageData | null>(null);
@@ -102,27 +106,24 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
 
   const { lang } = params;
   const isRTL = lang === 'ar';
-  const t = staticNavItems[lang] || staticNavItems.ar;
+  
+  const t = {
+      ar: { contact: { form: { name: "الاسم", email: "البريد الإلكتروني", phone: "رقم الهاتف", message: "الرسالة", submit: "إرسال", submitting: "جاري الإرسال...", success: "شكرًا لك! تم استلام رسالتك بنجاح.", error: "حدث خطأ. الرجاء المحاولة مرة أخرى." } } },
+      en: { contact: { form: { name: "Name", email: "Email", phone: "Phone", message: "Message", submit: "Send", submitting: "Sending...", success: "Thank you! Your message has been received.", error: "An error occurred. Please try again." } } }
+  }[lang];
+
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmissionStatus('submitting');
-
     const formData = new FormData();
     formData.append('your-name', formState.name);
     formData.append('your-email', formState.email);
     formData.append('your-phone', formState.phone);
     formData.append('your-message', formState.message);
-    
     try {
-      // ✨ ✨ ✨ تم استخدام الرقم الصحيح هنا ✨ ✨ ✨
-      const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/contact-form-7/v1/contact-forms/968/feedback`, {
-        method: 'POST',
-        body: formData,
-      });
-
+      const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/contact-form-7/v1/contact-forms/968/feedback`, { method: 'POST', body: formData });
       const result = await response.json();
-
       if (result.status === 'mail_sent') {
         setSubmissionStatus('success');
         setFormState({ name: '', email: '', phone: '', message: '' });
@@ -142,14 +143,24 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
       setError(null);
       const langCode = isRTL ? 'AR' : 'EN';
       const pageId = isRTL ? "87" : "64";
+      
+      const headerMenuName = isRTL ? 'Header Menu AR' : 'Header Menu EN';
+      const footerMenuName = isRTL ? 'Footer Menu AR' : 'Footer Menu EN';
+
       try {
         const response = await fetch('/api/graphql', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',
           body: JSON.stringify({
+            // ✨ ✨ ✨ تم استخدام الاستعلام الصحيح الذي تم اختباره ✨ ✨ ✨
             query: `
-                query GetEverything($language: LanguageCodeFilterEnum!, $pageId: ID!) {
+                query GetEverything(
+                  $language: LanguageCodeFilterEnum!, 
+                  $pageId: ID!, 
+                  $headerMenuName: ID!, 
+                  $footerMenuName: ID!
+                ) {
                   heroSlides(first: 5, where: {language: $language}) { nodes { title heroSlideacf { subtitle image { node { sourceUrl altText } } } } }
                   page(id: $pageId, idType: DATABASE_ID) {
                     homepageCeo { ceoSectionTitle ceoName ceoMessage ceoJobTitle ceoImage { node { sourceUrl altText } } }
@@ -169,14 +180,26 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                   services(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) slug serviceDetails { serviceDescription serviceImage { node { sourceUrl altText } } } } }
                   divisions(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) content(format: RENDERED) divisionDetails { divisionIcon } } }
                   portfolioItems(first: 20, where: {language: $language}) { nodes { id title portfolioItemDetails { commonText binomialText photo { node { sourceUrl altText } } } } }
+                  
+                  headerMenu: menu(id: $headerMenuName, idType: NAME) {
+                    menuItems { nodes { id label url path } }
+                  }
+                  footerMenu: menu(id: $footerMenuName, idType: NAME) {
+                    menuItems { nodes { id label url path } }
+                  }
                 }
             `,
-            variables: { language: langCode, pageId: pageId }
+            variables: { 
+              language: langCode, 
+              pageId: pageId,
+              headerMenuName: headerMenuName,
+              footerMenuName: footerMenuName
+            }
           }),
         });
         if (!response.ok) { const errorText = await response.text(); throw new Error(`API route failed: ${errorText}`); }
         const json = await response.json();
-        if (json.errors) { console.error("GraphQL Errors:", json.errors); throw new Error(`GraphQL query failed: ${JSON.stringify(json.errors)}`); }
+        if (json.errors) { console.error("GraphQL Errors from WordPress:", json.errors); throw new Error(`GraphQL query failed: ${JSON.stringify(json.errors)}`); }
         if (!json.data.page) { throw new Error(`Page with ID "${pageId}" not found.`); }
         setPageData(json.data);
       } catch (err: any) {
@@ -209,11 +232,11 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
     return <div className="min-h-screen bg-background text-text-primary flex justify-center items-center"><p>جاري تحميل محتوى الموقع...</p></div>;
   }
 
-  if (error || !pageData || !pageData.heroSlides) {
-    return <div className="min-h-screen bg-background text-text-primary flex justify-center items-center text-center p-4"><div><h2 className="text-red-500 text-2xl mb-4">خطأ في تحميل البيانات</h2><p className="text-left text-sm bg-background-secondary p-4 rounded-md font-mono whitespace-pre-wrap">{error}</p></div></div>;
+  if (error || !pageData || !pageData.heroSlides || !pageData.headerMenu || !pageData.footerMenu) {
+    return <div className="min-h-screen bg-background text-text-primary flex justify-center items-center text-center p-4"><div><h2 className="text-red-500 text-2xl mb-4">خطأ في تحميل البيانات</h2><p>لم يتم العثور على القوائم. تأكد من تعيين القوائم لمواقعها الصحيحة في ووردبريس (Header Menu AR/EN و Footer Menu AR/EN).</p><p className="text-left text-sm bg-background-secondary p-4 rounded-md font-mono whitespace-pre-wrap">{error}</p></div></div>;
   }
 
-  const { page, services, divisions, portfolioItems, heroSlides } = pageData;
+  const { page, services, divisions, portfolioItems, heroSlides, headerMenu, footerMenu } = pageData;
   const portfolioGalleryItems = portfolioItems.nodes.map((item: PortfolioItem) => ({ id: item.id, common: item.portfolioItemDetails.commonText, binomial: item.portfolioItemDetails.binomialText, photo: { url: item.portfolioItemDetails.photo.node.sourceUrl, text: item.portfolioItemDetails.photo.node.altText || item.title, pos: "center", by: "Makharez Team" } }));
   const equipmentImageUrls = parseImageUrlsFromHtml(page.equipmentSectionTitles.equipmentGallery);
   const whyUsListItems = page.whyUsSection.whyUsList.split('\n').filter(item => item.trim() !== '');
@@ -232,14 +255,15 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
       subtitle: node.heroSlideacf.subtitle
     }));
     
-  const navItems = isRTL ? t.nav.items : t.nav.items;
+  const headerNavItems = headerMenu.menuItems.nodes.map(item => ({ label: item.label, href: item.path }));
+  const footerNavItems = footerMenu.menuItems.nodes.map(item => ({ label: item.label, href: item.path }));
 
   return (
     <div className="min-h-screen bg-background text-text-primary">
         <Header 
             logoUrl={page.siteOptionsFields.logo.node.sourceUrl}
             logoAlt={page.siteOptionsFields.logo.node.altText || "Jassas Logo"}
-            navItems={navItems}
+            navItems={headerNavItems}
             lang={lang}
         />
 
@@ -662,7 +686,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                {/* ✨ تم تعديل حجم العنوان هنا ✨ */}
                 <h2
                   className={`text-2xl md:text-3xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                 >
@@ -868,7 +891,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             footerDescription={page.siteOptions.footerDescription}
             footerLogoUrl={page.siteOptions.footerLogo.node.sourceUrl}
             footerLogoAlt={page.siteOptions.footerLogo.node.altText}
-            quickLinks={navItems}
+            quickLinks={footerNavItems}
             contactInfo={{
               email: page.contactInfo.emailAddress,
               phone: page.contactInfo.phoneNumber,

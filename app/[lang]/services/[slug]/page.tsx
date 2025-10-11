@@ -10,6 +10,19 @@ interface ImageNode { sourceUrl: string; altText: string; }
 interface SiteOptions { footerTitle: string; footerDescription: string; footerLogo: { node: ImageNode }; }
 interface SiteOptionsFields { logo: { node: ImageNode }; }
 interface ContactInfo { emailAddress: string; phoneNumber: string; unifiedNumber: string; }
+
+interface MenuItem {
+    id: string;
+    label: string;
+    url: string;
+    path: string;
+}
+interface Menu {
+    menuItems: {
+        nodes: MenuItem[];
+    };
+}
+
 interface GenericSubService {
     title: string;
     coreServiceDetails?: {
@@ -18,7 +31,6 @@ interface GenericSubService {
         subServiceImages: string;
     };
 }
-// <<< تم تحديث الواجهة لتشمل الترجمات >>>
 interface MainCategoryData {
     name: string;
     translations?: {
@@ -34,6 +46,7 @@ interface MainCategoryData {
         nodes: GenericSubService[];
     };
 }
+
 interface PageData {
     serviceGroups: { nodes: MainCategoryData[] };
     page: {
@@ -41,30 +54,30 @@ interface PageData {
         siteOptionsFields: SiteOptionsFields;
         contactInfo: ContactInfo;
     };
+    headerMenu: Menu;
+    footerMenu: Menu;
 }
 
-const staticNavItems = {
-  ar: [{ label: "الرئيس التنفيذي", href: "/#ceo" }, { label: "من نحن", href: "/#about" }, { label: "خدماتنا", href: "/#services" }, { label: "أقسامنـا", href: "/#divisions" }, { label: "لماذا نحن", href: "/#whyus" }, { label: "معداتنا", href: "/#equipment" }, { label: "سياسة الجودة", href: "/#quality" }, { label: "معرض الأعمال", href: "/#portfolio" }, { label: "تواصل معنا", href: "/#contact" }],
-  en: [{ label: "CEO", href: "/#ceo" }, { label: "About Us", href: "/#about" }, { label: "Services", href: "/#services" }, { label: "Divisions", href: "/#divisions" }, { label: "Why Us", href: "/#whyus" }, { label: "Equipment", href: "/#equipment" }, { label: "Quality Policy", href: "/#quality" }, { label: "Portfolio", href: "/#portfolio" }, { label: "Contact Us", href: "/#contact" }]
-};
 
-async function getServicePageData(homepageId: string, categorySlug: string): Promise<PageData> {
+async function getServicePageData(homepageId: string, categorySlug: string, headerMenuName: string, footerMenuName: string): Promise<PageData> {
     const response = await fetch(process.env.WORDPRESS_API_URL!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         body: JSON.stringify({
             query: `
-                query GetServicePageData($homepageId: ID!, $categorySlug: [String]) {
+                query GetServicePageData(
+                    $homepageId: ID!, 
+                    $categorySlug: [String],
+                    $headerMenuName: ID!,
+                    $footerMenuName: ID!
+                ) {
                     serviceGroups(where: { slug: $categorySlug }) {
                         nodes {
                             name
-                            # <<< تم إضافة هذا الجزء لجلب الترجمات >>>
                             translations {
                                 slug
-                                language {
-                                    code
-                                }
+                                language { code }
                             }
                             serviceGroupFields {
                                 categoryDescription
@@ -84,9 +97,15 @@ async function getServicePageData(homepageId: string, categorySlug: string): Pro
                         siteOptionsFields { logo { node { sourceUrl altText } } }
                         contactInfo { emailAddress phoneNumber unifiedNumber }
                     }
+                    headerMenu: menu(id: $headerMenuName, idType: NAME) {
+                        menuItems { nodes { id label url path } }
+                    }
+                    footerMenu: menu(id: $footerMenuName, idType: NAME) {
+                        menuItems { nodes { id label url path } }
+                    }
                 }
             `,
-            variables: { homepageId, categorySlug }
+            variables: { homepageId, categorySlug, headerMenuName, footerMenuName }
         })
     });
     const json = await response.json();
@@ -101,16 +120,18 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
     const { lang, slug } = params;
     const isRTL = lang === 'ar';
     const homepageId = isRTL ? "87" : "64";
-    
-    const data = await getServicePageData(homepageId, slug);
 
-    if (!data || !data.serviceGroups?.nodes || data.serviceGroups.nodes.length === 0) {
+    const headerMenuName = isRTL ? 'Header Menu AR' : 'Header Menu EN';
+    const footerMenuName = isRTL ? 'Footer Menu AR' : 'Footer Menu EN';
+    
+    const data = await getServicePageData(homepageId, slug, headerMenuName, footerMenuName);
+
+    if (!data || !data.serviceGroups?.nodes || data.serviceGroups.nodes.length === 0 || !data.headerMenu || !data.footerMenu) {
         notFound();
     }
     
     const pageInfo = data.serviceGroups.nodes[0];
     
-    // <<< تم إضافة هذا الجزء لمعالجة روابط اللغات >>>
     const languageAlternates = pageInfo.translations?.reduce((acc, translation) => {
         const langKey = translation.language.code.toLowerCase().startsWith('en') ? 'en' : 'ar';
         acc[langKey] = translation.slug;
@@ -125,17 +146,20 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
         subServiceGallery: node.coreServiceDetails!.subServiceImages, 
     }));
     
+    // ✨ ✨ ✨ تم إصلاح الخطأ هنا بفصل عملية الاستخراج ✨ ✨ ✨
     const { siteOptions, siteOptionsFields, contactInfo } = data.page;
-    const navItems = isRTL ? staticNavItems.ar : staticNavItems.en;
+    const { headerMenu, footerMenu } = data;
+
+    const headerNavItems = headerMenu.menuItems.nodes.map(item => ({ label: item.label, href: item.path }));
+    const footerNavItems = footerMenu.menuItems.nodes.map(item => ({ label: item.label, href: item.path }));
 
     return (
         <div className="min-h-screen bg-background text-text-primary">
             <Header 
                 logoUrl={siteOptionsFields.logo.node.sourceUrl}
                 logoAlt={siteOptionsFields.logo.node.altText || "Jassas Logo"}
-                navItems={navItems}
+                navItems={headerNavItems}
                 lang={lang}
-                // <<< تم تمرير البيانات الجديدة إلى الهيدر >>>
                 alternates={languageAlternates}
             />
             <main className="pt-24 pb-16">
@@ -166,7 +190,7 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
               footerDescription={siteOptions.footerDescription}
               footerLogoUrl={siteOptions.footerLogo.node.sourceUrl}
               footerLogoAlt={siteOptions.footerLogo.node.altText || "Footer Logo"}
-              quickLinks={navItems}
+              quickLinks={footerNavItems}
               contactInfo={{
                 email: contactInfo.emailAddress,
                 phone: contactInfo.phoneNumber,

@@ -21,6 +21,8 @@ interface FooterProps {
 }
 
 export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLogoAlt, quickLinks, contactInfo, isRTL }: FooterProps) {
+  const lang = isRTL ? 'ar' : 'en';
+
   return (
     <footer className="bg-jassas-footer-bg py-12">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -50,12 +52,13 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
             <ul className="space-y-2">
               {quickLinks.map((item) => (
                 <li key={item.href}>
-                  <a
-                    href={item.href}
+                  {/* ✨ تم تعديل هذا الجزء بالكامل ✨ */}
+                  <Link
+                    href={`${item.href.startsWith('#') ? '' : `/${lang}`}${item.href}`}
                     className={`text-static-white hover:text-jassas-accent-red transition-colors ${isRTL ? "font-arabic" : "font-normal"}`}
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
