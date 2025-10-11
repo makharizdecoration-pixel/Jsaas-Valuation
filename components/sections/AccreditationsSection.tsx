@@ -42,7 +42,8 @@ export const AccreditationsSection: React.FC<AccreditationsSectionProps> = ({ ti
   return (
     <section id="accreditations" className="py-20 bg-background">
       <div className="container mx-auto text-center mb-12 px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-6">{title}</h2>
+        {/* ✨ تم تصغير حجم العنوان هنا ✨ */}
+        <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-6">{title}</h2>
         {subtitle && (
             <div 
                 className="text-lg text-text-secondary leading-relaxed max-w-6xl mx-auto"

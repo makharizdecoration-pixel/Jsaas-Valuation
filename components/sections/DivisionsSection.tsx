@@ -26,20 +26,16 @@ const extractFirstImageUrl = (htmlContent: string): string => {
   return firstImage?.getAttribute('src') || '/placeholder.jpg';
 };
 
-// ✨ تم تعديل هذه الدالة لتزيل الصورة الأولى ومعرض الصور ✨
 const getRenderableContentHtml = (htmlContent: string): string => {
   if (!htmlContent) return '';
   const root = parse(htmlContent);
 
-  // الخطوة 1: ابحث عن الصورة الأولى (الشعار) وقم بحذفها من المحتوى
   const firstImage = root.querySelector('img');
   if (firstImage) firstImage.remove();
 
-  // الخطوة 2: ابحث عن معرض الصور وقم بحذفه
   const gallery = root.querySelector('.wp-block-gallery');
   if (gallery) gallery.remove();
 
-  // إرجاع باقي المحتوى الذي هو الآن النص المنسق فقط
   return root.innerHTML;
 };
 
@@ -158,7 +154,7 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
+          <h2 className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
             {mainTitle}
           </h2>
           <p className={`text-lg leading-relaxed text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
@@ -196,8 +192,9 @@ export const DivisionsSection: React.FC<DivisionsSectionProps> = ({
                   exit="exit"
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
+                  {/* ✨ تم تصغير حجم هذا العنوان درجة إضافية ✨ */}
                   <h3 
-                    className={`text-3xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                    className={`text-xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                   >
                     {activeDivision.title}
                   </h3>

@@ -30,7 +30,8 @@ export const BrandStatementSection: React.FC<BrandStatementProps> = ({ sideTitle
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            <h2 className={`text-5xl lg:text-6xl font-bold leading-tight ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
+            {/* ✨ 1. تم تصغير حجم العنوان هنا ✨ */}
+            <h2 className={`text-2xl md:text-3xl font-bold leading-tight ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
               {sideTitle}
             </h2>
           </motion.div>
@@ -49,12 +50,14 @@ export const BrandStatementSection: React.FC<BrandStatementProps> = ({ sideTitle
               ))}
             </div>
             
-            {/* خط فاصل واقتباس */}
-            <div className="mt-8 pt-8 border-t border-border/50">
-              <p className={`text-xl text-text-primary italic ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
-                "{quote}"
-              </p>
-            </div>
+            {/* ✨ 2. تم تعديل هذا الجزء ليختفي بالكامل إذا لم يكن هناك اقتباس ✨ */}
+            {quote && (
+              <div className="mt-8 pt-8 border-t border-border/50">
+                <p className={`text-xl text-text-primary italic ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
+                  "{quote}"
+                </p>
+              </div>
+            )}
           </motion.div>
 
         </div>

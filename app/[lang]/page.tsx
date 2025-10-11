@@ -153,7 +153,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',
           body: JSON.stringify({
-            // ✨ ✨ ✨ تم استخدام الاستعلام الصحيح الذي تم اختباره ✨ ✨ ✨
             query: `
                 query GetEverything(
                   $language: LanguageCodeFilterEnum!, 
@@ -309,8 +308,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
+                {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
                 <motion.h2
-                  className={`text-3xl md:text-4xl font-bold mb-4 text-accent ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                  className={`text-2xl md:text-3xl font-bold mb-4 text-accent ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
                 >
                   {page.homepageCeo.ceoSectionTitle}
@@ -357,8 +357,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
+              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.aboutUs.aboutSectionTitle}
               </h2>
@@ -489,8 +490,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
+              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.servicesSectionTitles.servicesMainTitle}
               </h2>
@@ -521,8 +523,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
+              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.whyUsSection.whyUsTitle}
               </h2>
@@ -563,8 +566,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
+              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
-                className={`text-3xl md:text-4xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                className={`text-xl md:text-2xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.qualityPolicySection.qualityTitle}
               </h2>
@@ -605,8 +609,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
+              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.portfolioSectionTitle.portfolioTitle}
               </h2>
@@ -686,8 +691,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
+                {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
                 <h2
-                  className={`text-2xl md:text-3xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                  className={`text-xl md:text-2xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                 >
                   {page.equipmentSectionTitles.equipmentMainTitle}
                 </h2>
@@ -715,8 +721,9 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
+              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
-                className={`text-4xl md:text-5xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
+                className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
                 {page.contactInfo.contactSectionTitle}
               </h2>
