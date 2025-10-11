@@ -21,17 +21,15 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query, variables }),
-      // cache: 'no-store' // Use this to bypass cache if needed
+      // ✨ --- تم تفعيل هذا السطر لحل مشكلة المهلة محليًا --- ✨
+      cache: 'no-store' 
     });
 
     const responseBody = await response.json();
 
-    // --- 👇 التعديل الرئيسي هنا 👇 ---
-    // إذا أرجع ووردبريس أي خطأ، سنطبعه بالتفصيل في الترمينال
     if (responseBody.errors) {
       console.error("🔴 GraphQL Errors from WordPress:", JSON.stringify(responseBody.errors, null, 2));
     }
-    // --- 👆 نهاية التعديل 👆 ---
 
     return NextResponse.json(responseBody);
 

@@ -1,13 +1,23 @@
-// app/[lang]/services/[slug]/page.tsx
+// app/[lang]/[slug]/page.tsx
 
-import { InteractiveServiceViewer } from "@/components/sections/InteractiveServiceViewer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { InteractiveServiceViewer } from "@/components/sections/InteractiveServiceViewer";
 import { notFound } from 'next/navigation';
 
 // --- واجهات البيانات (Interfaces) ---
 interface ImageNode { sourceUrl: string; altText: string; }
-interface SiteOptions { footerTitle: string; footerDescription: string; footerLogo: { node: ImageNode }; }
+
+interface SiteOptions { 
+    footerTitle: string; 
+    footerDescription: string; 
+    footerLogo: { node: ImageNode };
+    profilePdf?: {
+        node: {
+            mediaItemUrl: string;
+        }
+    }
+}
 interface SiteOptionsFields { logo: { node: ImageNode }; }
 interface ContactInfo { emailAddress: string; phoneNumber: string; unifiedNumber: string; }
 
@@ -93,7 +103,16 @@ async function getServicePageData(homepageId: string, categorySlug: string, head
                         }
                     }
                     page(id: $homepageId, idType: DATABASE_ID) {
-                        siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
+                        siteOptions { 
+                            footerTitle 
+                            footerDescription 
+                            footerLogo { node { sourceUrl altText } }
+                            profilePdf {
+                                node {
+                                    mediaItemUrl
+                                }
+                            }
+                        }
                         siteOptionsFields { logo { node { sourceUrl altText } } }
                         contactInfo { emailAddress phoneNumber unifiedNumber }
                     }
@@ -146,7 +165,6 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
         subServiceGallery: node.coreServiceDetails!.subServiceImages, 
     }));
     
-    // ✨ ✨ ✨ تم إصلاح الخطأ هنا بفصل عملية الاستخراج ✨ ✨ ✨
     const { siteOptions, siteOptionsFields, contactInfo } = data.page;
     const { headerMenu, footerMenu } = data;
 
@@ -160,7 +178,7 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
                 logoAlt={siteOptionsFields.logo.node.altText || "Jassas Logo"}
                 navItems={headerNavItems}
                 lang={lang}
-                alternates={languageAlternates}
+                profilePdfUrl={siteOptions?.profilePdf?.node?.mediaItemUrl}
             />
             <main className="pt-24 pb-16">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -197,6 +215,8 @@ export default async function ServicePage({ params }: { params: { lang: 'ar' | '
                 unified: contactInfo.unifiedNumber
               }}
               isRTL={isRTL}
+              // ✨ --- هذا هو السطر الذي تمت إضافته --- ✨
+              profilePdfUrl={siteOptions?.profilePdf?.node?.mediaItemUrl}
             />
         </div>
     );

@@ -1,5 +1,6 @@
 // components/layout/Footer.tsx
 import Link from 'next/link';
+import { Download } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -18,9 +19,10 @@ interface FooterProps {
     unified: string;
   };
   isRTL: boolean;
+  profilePdfUrl?: string;
 }
 
-export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLogoAlt, quickLinks, contactInfo, isRTL }: FooterProps) {
+export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLogoAlt, quickLinks, contactInfo, isRTL, profilePdfUrl }: FooterProps) {
   const lang = isRTL ? 'ar' : 'en';
 
   return (
@@ -52,7 +54,6 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
             <ul className="space-y-2">
               {quickLinks.map((item) => (
                 <li key={item.href}>
-                  {/* ✨ تم تعديل هذا الجزء بالكامل ✨ */}
                   <Link
                     href={`${item.href.startsWith('#') ? '' : `/${lang}`}${item.href}`}
                     className={`text-static-white hover:text-jassas-accent-red transition-colors ${isRTL ? "font-arabic" : "font-normal"}`}
@@ -61,6 +62,20 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
                   </Link>
                 </li>
               ))}
+              {profilePdfUrl && (
+                <li>
+                  <a
+                      href={profilePdfUrl}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex items-center gap-x-2 text-static-white hover:text-jassas-accent-red transition-colors ${isRTL ? "font-arabic" : "font-normal"}`}
+                  >
+                      <Download className="w-4 h-4" />
+                      <span>{isRTL ? "تحميل ملف الشركة" : "Download Profile"}</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 

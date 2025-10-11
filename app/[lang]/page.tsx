@@ -36,7 +36,18 @@ interface Menu {
 // TYPESCRIPT INTERFACES
 interface ImageNode { sourceUrl: string; altText: string; }
 interface SiteOptionsFields { logo: { node: ImageNode }; }
-interface SiteOptions { footerTitle: string; footerDescription: string; footerLogo: { node: ImageNode }; }
+
+interface SiteOptions { 
+  footerTitle: string; 
+  footerDescription: string; 
+  footerLogo: { node: ImageNode };
+  profilePdf?: {
+    node: {
+      mediaItemUrl: string;
+    }
+  }
+}
+
 interface CeoData { ceoSectionTitle: string; ceoName: string; ceoMessage: string; ceoJobTitle: string; ceoImage: { node: ImageNode }; }
 interface AboutData { aboutSectionTitle: string; aboutSectionContent: string; visionTitle: string; visionContent: string; missionTitle: string; missionContent: string; valuesTitle: string; valuesContent: string; vision2030Image: { node: ImageNode }; vision2030Title: string; vision2030Tagline: string; }
 interface ServicesSectionTitles { servicesMainTitle: string; servicesSubtitle: string; }
@@ -173,13 +184,21 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     portfolioSectionTitle { portfolioTitle portfolioSubtitle }
                     contactInfo { contactSectionTitle contactSectionSubtitle emailAddress phoneNumber unifiedNumber branchesAddress qrCodeImage { node { sourceUrl altText } } qrCodeText }
                     siteOptionsFields { logo { node { sourceUrl altText } } }
-                    siteOptions { footerTitle footerDescription footerLogo { node { sourceUrl altText } } }
+                    siteOptions { 
+                      footerTitle 
+                      footerDescription 
+                      footerLogo { node { sourceUrl altText } }
+                      profilePdf {
+                        node {
+                          mediaItemUrl
+                        }
+                      }
+                    }
                     brandStatementSection { sideTitle paragraphs quote }
                   }
                   services(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) slug serviceDetails { serviceDescription serviceImage { node { sourceUrl altText } } } } }
                   divisions(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) content(format: RENDERED) divisionDetails { divisionIcon } } }
                   portfolioItems(first: 20, where: {language: $language}) { nodes { id title portfolioItemDetails { commonText binomialText photo { node { sourceUrl altText } } } } }
-                  
                   headerMenu: menu(id: $headerMenuName, idType: NAME) {
                     menuItems { nodes { id label url path } }
                   }
@@ -209,7 +228,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
       }
     }
     fetchAllData();
-  }, [isRTL]);
+  }, [lang, isRTL]);
 
   useEffect(() => {
     const handleScroll = () => { setShowScrollTop(window.scrollY > 500); };
@@ -264,6 +283,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             logoAlt={page.siteOptionsFields.logo.node.altText || "Jassas Logo"}
             navItems={headerNavItems}
             lang={lang}
+            profilePdfUrl={page.siteOptions?.profilePdf?.node?.mediaItemUrl}
         />
 
       <main key={lang}>
@@ -308,7 +328,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
                 <motion.h2
                   className={`text-2xl md:text-3xl font-bold mb-4 text-accent ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
@@ -357,7 +376,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
                 className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
@@ -490,7 +508,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
                 className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
@@ -523,7 +540,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
                 className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
@@ -566,7 +582,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
                 className={`text-xl md:text-2xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
@@ -609,7 +624,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
                 className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
@@ -691,7 +705,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
                 <h2
                   className={`text-xl md:text-2xl leading-relaxed font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
                 >
@@ -721,7 +734,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              {/* ✨ تم تصغير حجم هذا العنوان ✨ */}
               <h2
                 className={`text-2xl md:text-3xl font-bold text-text-primary mb-6 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}
               >
@@ -905,6 +917,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
               unified: page.contactInfo.unifiedNumber
             }}
             isRTL={isRTL}
+            profilePdfUrl={page.siteOptions?.profilePdf?.node?.mediaItemUrl}
         />
       
       <motion.button
