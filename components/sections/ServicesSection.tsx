@@ -194,11 +194,14 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
-              <h2 className='text-xl font-arabic font-bold text-text-primary mb-4'>
-                {currentService.title}
-              </h2>
               
-              {/* ✨ --- هذا هو السطر الذي تم تعديله --- ✨ */}
+              {/* ✨ --- تم التعديل هنا: إضافة حاوية بارتفاع ثابت للعنوان --- ✨ */}
+              <div className="h-14 flex items-center justify-center mb-4">
+                <h2 className='text-xl font-arabic font-bold text-text-primary'>
+                  {currentService.title}
+                </h2>
+              </div>
+              
               <div className={cn("mb-6", isRTL ? "h-[120px]" : "h-[160px]")}>
                 <p className={cn(
                     'text-text-secondary text-sm leading-relaxed whitespace-pre-wrap',
