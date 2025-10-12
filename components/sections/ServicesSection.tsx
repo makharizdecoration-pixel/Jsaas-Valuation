@@ -164,9 +164,8 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
         </motion.div>
       </div>
 
-      {/* === تم تطبيق التعديلات هنا في نسخة الجوال === */}
       <div className='md:hidden max-w-sm mx-auto text-center'>
-        <div className='w-full aspect-square bg-background-secondary rounded-3xl overflow-hidden mb-6 shadow-lg'>
+        <div className='w-11/12 mx-auto aspect-square bg-background-secondary rounded-3xl overflow-hidden mb-6 shadow-lg'>
           <AnimatePresence mode='wait'>
             <motion.div
               key={currentService.id}
@@ -198,13 +197,17 @@ export function ServicesSection({ services, className, lang }: ServicesSectionPr
               <h2 className='text-xl font-arabic font-bold text-text-primary mb-4'>
                 {currentService.title}
               </h2>
-              {/* 1. تم تغيير الارتفاع إلى ثابت */}
-              {/* 2. تم إضافة line-clamp للنص */}
-              <div className="h-[120px] mb-6">
-                <p className='text-text-secondary text-sm leading-relaxed whitespace-pre-wrap line-clamp-5'>
+              
+              {/* ✨ --- هذا هو السطر الذي تم تعديله --- ✨ */}
+              <div className={cn("mb-6", isRTL ? "h-[120px]" : "h-[160px]")}>
+                <p className={cn(
+                    'text-text-secondary text-sm leading-relaxed whitespace-pre-wrap',
+                    isRTL ? 'line-clamp-5' : 'line-clamp-6'
+                  )}>
                   {currentService.serviceDetails.serviceDescription}
                 </p>
               </div>
+
               <div className="mt-4">
                 <Link href={`/${lang}/services/${currentService.slug}`}>
                   <span className="inline-block bg-accent text-accent-text font-bold py-2 px-6 rounded-lg hover:bg-accent/90 transition-colors">
