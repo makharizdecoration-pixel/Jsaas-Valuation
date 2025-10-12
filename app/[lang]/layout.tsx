@@ -29,7 +29,7 @@ const loewNextArabic = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "مجموعة جساس للمقاولات | Jassas Contracting Group",
+  title: "مجموعة جسّاس للمقاولات | Jsaas Contracting Group",
   description: "رواد في قطاع المقاولات والبنية التحتية في المملكة العربية السعودية",
 };
 
