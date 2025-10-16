@@ -37,9 +37,9 @@ interface Menu {
 interface ImageNode { sourceUrl: string; altText: string; }
 interface SiteOptionsFields { logo: { node: ImageNode }; }
 
-interface SiteOptions { 
-  footerTitle: string; 
-  footerDescription: string; 
+interface SiteOptions {
+  footerTitle: string;
+  footerDescription: string;
   footerLogo: { node: ImageNode };
   profilePdf?: {
     node: {
@@ -117,10 +117,10 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
 
   const { lang } = params;
   const isRTL = lang === 'ar';
-  
+
   const t = {
-      ar: { contact: { form: { name: "الاسم", email: "البريد الإلكتروني", phone: "رقم الهاتف", message: "الرسالة", submit: "إرسال", submitting: "جاري الإرسال...", success: "شكرًا لك! تم استلام رسالتك بنجاح.", error: "حدث خطأ. الرجاء المحاولة مرة أخرى." } } },
-      en: { contact: { form: { name: "Name", email: "Email", phone: "Phone", message: "Message", submit: "Send", submitting: "Sending...", success: "Thank you! Your message has been received.", error: "An error occurred. Please try again." } } }
+    ar: { contact: { form: { name: "الاسم", email: "البريد الإلكتروني", phone: "رقم الهاتف", message: "الرسالة", submit: "إرسال", submitting: "جاري الإرسال...", success: "شكرًا لك! تم استلام رسالتك بنجاح.", error: "حدث خطأ. الرجاء المحاولة مرة أخرى." } } },
+    en: { contact: { form: { name: "Name", email: "Email", phone: "Phone", message: "Message", submit: "Send", submitting: "Sending...", success: "Thank you! Your message has been received.", error: "An error occurred. Please try again." } } }
   }[lang];
 
 
@@ -133,15 +133,17 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
     formData.append('your-phone', formState.phone);
     formData.append('your-message', formState.message);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/contact-form-7/v1/contact-forms/968/feedback`, { method: 'POST', body: formData });
+      const response = await fetch('/api/contact',
+        { method: 'POST', body: formData });
       const result = await response.json();
-      if (result.status === 'mail_sent') {
-        setSubmissionStatus('success');
-        setFormState({ name: '', email: '', phone: '', message: '' });
+      if (result.success) {
+        setSubmissionStatus('success')
+        setFormState({ name: '', email: '', phone: '', message: '' })
       } else {
-        console.error('CF7 Submission Error:', result.message);
-        setSubmissionStatus('error');
+        console.error('API Submission Error:', result.error)
+        setSubmissionStatus('error')
       }
+
     } catch (error) {
       console.error('Fetch Error:', error);
       setSubmissionStatus('error');
@@ -154,7 +156,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
       setError(null);
       const langCode = isRTL ? 'AR' : 'EN';
       const pageId = isRTL ? "87" : "64";
-      
+
       const headerMenuName = isRTL ? 'Header Menu AR' : 'Header Menu EN';
       const footerMenuName = isRTL ? 'Footer Menu AR' : 'Footer Menu EN';
 
@@ -165,50 +167,50 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           cache: 'no-store',
           body: JSON.stringify({
             query: `
-                query GetEverything(
-                  $language: LanguageCodeFilterEnum!, 
-                  $pageId: ID!, 
-                  $headerMenuName: ID!, 
-                  $footerMenuName: ID!
-                ) {
-                  heroSlides(first: 5, where: {language: $language}) { nodes { title heroSlideacf { subtitle image { node { sourceUrl altText } } } } }
-                  page(id: $pageId, idType: DATABASE_ID) {
-                    homepageCeo { ceoSectionTitle ceoName ceoMessage ceoJobTitle ceoImage { node { sourceUrl altText } } }
-                    aboutUs { aboutSectionTitle aboutSectionContent visionTitle visionContent missionTitle missionContent valuesTitle valuesContent vision2030Image { node { sourceUrl altText } } vision2030Title vision2030Tagline }
-                    accreditationsSection { accreditationsTitle accreditationsSubtitle accreditationsGallery }
-                    servicesSectionTitles { servicesMainTitle servicesSubtitle }
-                    divisionsSectionTitles { divisionsMainTitle divisionsSubtitle }
-                    equipmentSectionTitles { equipmentMainTitle equipmentSubtitle equipmentGallery }
-                    qualityPolicySection { qualityTitle qualityContent qualityCommitments }
-                    whyUsSection { whyUsTitle whyUsSubtitle whyUsList }
-                    portfolioSectionTitle { portfolioTitle portfolioSubtitle }
-                    contactInfo { contactSectionTitle contactSectionSubtitle emailAddress phoneNumber unifiedNumber branchesAddress qrCodeImage { node { sourceUrl altText } } qrCodeText }
-                    siteOptionsFields { logo { node { sourceUrl altText } } }
-                    siteOptions { 
-                      footerTitle 
-                      footerDescription 
-                      footerLogo { node { sourceUrl altText } }
-                      profilePdf {
-                        node {
-                          mediaItemUrl
+                  query GetEverything(
+                    $language: LanguageCodeFilterEnum!, 
+                    $pageId: ID!, 
+                    $headerMenuName: ID!, 
+                    $footerMenuName: ID!
+                  ) {
+                    heroSlides(first: 5, where: {language: $language}) { nodes { title heroSlideacf { subtitle image { node { sourceUrl altText } } } } }
+                    page(id: $pageId, idType: DATABASE_ID) {
+                      homepageCeo { ceoSectionTitle ceoName ceoMessage ceoJobTitle ceoImage { node { sourceUrl altText } } }
+                      aboutUs { aboutSectionTitle aboutSectionContent visionTitle visionContent missionTitle missionContent valuesTitle valuesContent vision2030Image { node { sourceUrl altText } } vision2030Title vision2030Tagline }
+                      accreditationsSection { accreditationsTitle accreditationsSubtitle accreditationsGallery }
+                      servicesSectionTitles { servicesMainTitle servicesSubtitle }
+                      divisionsSectionTitles { divisionsMainTitle divisionsSubtitle }
+                      equipmentSectionTitles { equipmentMainTitle equipmentSubtitle equipmentGallery }
+                      qualityPolicySection { qualityTitle qualityContent qualityCommitments }
+                      whyUsSection { whyUsTitle whyUsSubtitle whyUsList }
+                      portfolioSectionTitle { portfolioTitle portfolioSubtitle }
+                      contactInfo { contactSectionTitle contactSectionSubtitle emailAddress phoneNumber unifiedNumber branchesAddress qrCodeImage { node { sourceUrl altText } } qrCodeText }
+                      siteOptionsFields { logo { node { sourceUrl altText } } }
+                      siteOptions { 
+                        footerTitle 
+                        footerDescription 
+                        footerLogo { node { sourceUrl altText } }
+                        profilePdf {
+                          node {
+                            mediaItemUrl
+                          }
                         }
                       }
+                      brandStatementSection { sideTitle paragraphs quote }
                     }
-                    brandStatementSection { sideTitle paragraphs quote }
+                    services(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) slug serviceDetails { serviceDescription serviceImage { node { sourceUrl altText } } } } }
+                    divisions(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) content(format: RENDERED) divisionDetails { divisionIcon } } }
+                    portfolioItems(first: 20, where: {language: $language}) { nodes { id title portfolioItemDetails { commonText binomialText photo { node { sourceUrl altText } } } } }
+                    headerMenu: menu(id: $headerMenuName, idType: NAME) {
+                      menuItems { nodes { id label url path } }
+                    }
+                    footerMenu: menu(id: $footerMenuName, idType: NAME) {
+                      menuItems { nodes { id label url path } }
+                    }
                   }
-                  services(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) slug serviceDetails { serviceDescription serviceImage { node { sourceUrl altText } } } } }
-                  divisions(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) content(format: RENDERED) divisionDetails { divisionIcon } } }
-                  portfolioItems(first: 20, where: {language: $language}) { nodes { id title portfolioItemDetails { commonText binomialText photo { node { sourceUrl altText } } } } }
-                  headerMenu: menu(id: $headerMenuName, idType: NAME) {
-                    menuItems { nodes { id label url path } }
-                  }
-                  footerMenu: menu(id: $footerMenuName, idType: NAME) {
-                    menuItems { nodes { id label url path } }
-                  }
-                }
-            `,
-            variables: { 
-              language: langCode, 
+              `,
+            variables: {
+              language: langCode,
               pageId: pageId,
               headerMenuName: headerMenuName,
               footerMenuName: footerMenuName
@@ -261,10 +263,10 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
   const qualityCommitmentsList = page.qualityPolicySection.qualityCommitments.split('\n').filter(item => item.trim() !== '');
 
   const brandStatementData = page.brandStatementSection;
-  const paragraphsArray = brandStatementData && brandStatementData.paragraphs 
-      ? brandStatementData.paragraphs.split('\n').filter(p => p.trim() !== '') 
-      : [];
-      
+  const paragraphsArray = brandStatementData && brandStatementData.paragraphs
+    ? brandStatementData.paragraphs.split('\n').filter(p => p.trim() !== '')
+    : [];
+
   const slides: Slide[] = heroSlides.nodes
     .filter(node => node?.heroSlideacf?.image?.node?.sourceUrl)
     .map(node => ({
@@ -272,23 +274,23 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
       title: node.title,
       subtitle: node.heroSlideacf.subtitle
     }));
-    
+
   const headerNavItems = headerMenu.menuItems.nodes.map(item => ({ label: item.label, href: item.path }));
   const footerNavItems = footerMenu.menuItems.nodes.map(item => ({ label: item.label, href: item.path }));
 
   return (
     <div className="min-h-screen bg-background text-text-primary">
-        <Header 
-            logoUrl={page.siteOptionsFields.logo.node.sourceUrl}
-            logoAlt={page.siteOptionsFields.logo.node.altText || "Jassas Logo"}
-            navItems={headerNavItems}
-            lang={lang}
-            profilePdfUrl={page.siteOptions?.profilePdf?.node?.mediaItemUrl}
-        />
+      <Header
+        logoUrl={page.siteOptionsFields.logo.node.sourceUrl}
+        logoAlt={page.siteOptionsFields.logo.node.altText || "Jassas Logo"}
+        navItems={headerNavItems}
+        lang={lang}
+        profilePdfUrl={page.siteOptions?.profilePdf?.node?.mediaItemUrl}
+      />
 
       <main key={lang}>
         <HeroSlider className="h-screen" slides={slides} />
-        
+
         <section id="ceo" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -498,7 +500,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.div>
           </div>
         </section>
-        
+
         <section id="services" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -572,7 +574,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.ul>
           </div>
         </section>
-        
+
         <section id="quality" className="py-20 bg-background">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -614,7 +616,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.ul>
           </div>
         </section>
-        
+
         <section id="portfolio" className="py-20 bg-background-secondary/30 hidden">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -811,7 +813,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       required
                     ></textarea>
                   </div>
-                  
+
                   {(submissionStatus === 'idle' || submissionStatus === 'submitting') && (
                     <button
                       type="submit"
@@ -835,7 +837,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     </div>
                   )}
                   {submissionStatus === 'error' && (
-                     <div className="text-red-700 bg-red-100 p-4 rounded-lg text-center font-semibold">
+                    <div className="text-red-700 bg-red-100 p-4 rounded-lg text-center font-semibold">
                       {t.contact.form.error}
                     </div>
                   )}
@@ -905,21 +907,21 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
 
       </main>
 
-        <Footer
-            footerTitle={page.siteOptions.footerTitle}
-            footerDescription={page.siteOptions.footerDescription}
-            footerLogoUrl={page.siteOptions.footerLogo.node.sourceUrl}
-            footerLogoAlt={page.siteOptions.footerLogo.node.altText}
-            quickLinks={footerNavItems}
-            contactInfo={{
-              email: page.contactInfo.emailAddress,
-              phone: page.contactInfo.phoneNumber,
-              unified: page.contactInfo.unifiedNumber
-            }}
-            isRTL={isRTL}
-            profilePdfUrl={page.siteOptions?.profilePdf?.node?.mediaItemUrl}
-        />
-      
+      <Footer
+        footerTitle={page.siteOptions.footerTitle}
+        footerDescription={page.siteOptions.footerDescription}
+        footerLogoUrl={page.siteOptions.footerLogo.node.sourceUrl}
+        footerLogoAlt={page.siteOptions.footerLogo.node.altText}
+        quickLinks={footerNavItems}
+        contactInfo={{
+          email: page.contactInfo.emailAddress,
+          phone: page.contactInfo.phoneNumber,
+          unified: page.contactInfo.unifiedNumber
+        }}
+        isRTL={isRTL}
+        profilePdfUrl={page.siteOptions?.profilePdf?.node?.mediaItemUrl}
+      />
+
       <motion.button
         className="fixed bottom-8 right-8 bg-accent text-accent-text p-3 rounded-full shadow-lg hover:bg-accent/90 transition-colors z-50"
         initial={{ opacity: 0, scale: 0 }}
