@@ -1,4 +1,4 @@
-// components/layout/Footer.tsx 
+// components/layout/Footer.tsx
 import Link from 'next/link';
 import { Download } from 'lucide-react';
 
@@ -26,14 +26,17 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
   const lang = isRTL ? 'ar' : 'en';
 
   return (
-    <footer className="bg-jassas-footer-bg py-12">
+    // --- 🎨 تم استخدام كلاسات Tailwind الديناميكية ---
+    <footer className="bg-background-secondary py-12">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           <div>
-            <h3 className={`text-xl font-bold text-static-white mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
+            {/* 🎨 استخدام لون النص الأساسي هنا (غالباً أبيض أو فاتح على خلفية داكنة) */}
+            <h3 className={`text-xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
               {footerTitle}
             </h3>
-            <p className={`text-static-white/80 mb-4 ${isRTL ? "font-arabic" : "font-normal"}`}>
+             {/* 🎨 استخدام لون النص الثانوي هنا */}
+            <p className={`text-text-secondary mb-4 ${isRTL ? "font-arabic" : "font-normal"}`}>
               {footerDescription}
             </p>
             <div className="flex">
@@ -48,7 +51,8 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
           </div>
 
           <div>
-            <h3 className={`text-xl font-bold text-static-white mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
+             {/* 🎨 استخدام لون النص الأساسي */}
+            <h3 className={`text-xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
               {isRTL ? "روابط سريعة" : "Quick Links"}
             </h3>
             <ul className="space-y-2">
@@ -56,7 +60,8 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
                 <li key={item.href}>
                   <Link
                     href={`${item.href.startsWith('#') ? '' : `/${lang}`}${item.href}`}
-                    className={`text-static-white hover:text-jassas-accent-red transition-colors ${isRTL ? "font-arabic" : "font-normal"}`}
+                     // --- 🎨 تم استخدام كلاسات Tailwind الديناميكية ---
+                    className={`text-text-secondary hover:text-accent transition-colors ${isRTL ? "font-arabic" : "font-normal"}`}
                   >
                     {item.label}
                   </Link>
@@ -69,7 +74,8 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
                       download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex items-center gap-x-2 text-static-white hover:text-jassas-accent-red transition-colors ${isRTL ? "font-arabic" : "font-normal"}`}
+                      // --- 🎨 تم استخدام كلاسات Tailwind الديناميكية ---
+                      className={`flex items-center gap-x-2 text-text-secondary hover:text-accent transition-colors ${isRTL ? "font-arabic" : "font-normal"}`}
                   >
                       <Download className="w-4 h-4" />
                       <span>{isRTL ? "تحميل ملف الشركة" : "Download Profile"}</span>
@@ -80,18 +86,20 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
           </div>
 
           <div>
-            <h3 className={`text-xl font-bold text-static-white mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
+            {/* 🎨 استخدام لون النص الأساسي */}
+            <h3 className={`text-xl font-bold text-text-primary mb-4 ${isRTL ? "font-arabic font-bold" : "font-bold"}`}>
               {isRTL ? "تواصل معنا" : "Contact Us"}
             </h3>
+             {/* 🎨 استخدام لون النص الثانوي */}
             {contactInfo && (
               <div className="space-y-2">
-                <p className={`text-static-white ${isRTL ? "font-arabic" : "font-normal"}`}>
+                <p className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
                   {contactInfo.email}
                 </p>
-                <p className={`text-static-white ${isRTL ? "font-arabic" : "font-normal"}`}>
+                <p className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
                   {contactInfo.phone}
                 </p>
-                <p className={`text-static-white ${isRTL ? "font-arabic" : "font-normal"}`}>
+                <p className={`text-text-secondary ${isRTL ? "font-arabic" : "font-normal"}`}>
                   {contactInfo.unified}
                 </p>
               </div>
@@ -99,9 +107,9 @@ export function Footer({ footerTitle, footerDescription, footerLogoUrl, footerLo
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-8 text-center">
-          <p className={`text-text-secondary/70 ${isRTL ? "font-arabic" : "font-normal"}`}>
-            {isRTL ? `© ${new Date().getFullYear()} جساس للمقاولات. جميع الحقوق محفوظة.` : `© ${new Date().getFullYear()} Jsaas Contracting. All rights reserved.`}
+        <div className="border-t border-border pt-8 text-center"> {/* 🎨 استخدام border-border */}
+          <p className={`text-text-secondary/70 ${isRTL ? "font-arabic" : "font-normal"}`}> {/* لون مناسب */}
+            {isRTL ? `© ${new Date().getFullYear()} جساس للتقييم. جميع الحقوق محفوظة.` : `© ${new Date().getFullYear()} Jsaas Valuation. All rights reserved.`}
           </p>
         </div>
       </div>
