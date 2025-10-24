@@ -29,8 +29,8 @@ const loewNextArabic = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "مجموعة جسّاس للمقاولات | Jsaas Contracting Group",
-  description: "رواد في قطاع المقاولات والبنية التحتية في المملكة العربية السعودية",
+  title: "جساس للتقييم | Jsaas Valuation", // الاسم الجديد
+  description: "شركة جساس للتقييم، شركة رائدة ومتكاملة في المملكة العربية السعودية، متخصصة في تقديم خدمات تقييم احترافية لمختلف أنواع الأصول بأعلى معايير الجودة.", // الوصف الجديد
 };
 
 export default function RootLayout({
