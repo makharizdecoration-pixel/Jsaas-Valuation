@@ -533,7 +533,8 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           subtitle={page.divisionsSectionTitles.divisionsSubtitle}
         />
 
-        <section id="whyus" className="py-20 bg-background">
+        {/* --- 🎨 تم التعديل هنا: إضافة كلاس hidden --- */}
+        <section id="whyus" className="py-20 bg-background hidden">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
               className="text-center mb-16"
@@ -575,7 +576,8 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           </div>
         </section>
 
-        <section id="quality" className="py-20 bg-background">
+        {/* --- 🎨 تم التعديل هنا: إضافة كلاس hidden --- */}
+        <section id="quality" className="py-20 bg-background hidden">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
               className="text-center mb-16"
@@ -664,16 +666,20 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           </div>
         </section>
 
+        {/* --- 🎨 تم التعديل هنا: إضافة حاوية بكلاس hidden --- */}
         {brandStatementData && (
-          <BrandStatementSection
-            sideTitle={brandStatementData.sideTitle}
-            paragraphs={paragraphsArray}
-            quote={brandStatementData.quote}
-            isRTL={isRTL}
-          />
+          <div className="hidden">
+            <BrandStatementSection
+              sideTitle={brandStatementData.sideTitle}
+              paragraphs={paragraphsArray}
+              quote={brandStatementData.quote}
+              isRTL={isRTL}
+            />
+          </div>
         )}
 
-        <section id="equipment" className="py-20 bg-background-secondary/30">
+        {/* --- 🎨 تم التعديل هنا: إضافة كلاس hidden --- */}
+        <section id="equipment" className="py-20 bg-background-secondary/30 hidden">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
               className="grid lg:grid-cols-2 gap-12 items-center"
