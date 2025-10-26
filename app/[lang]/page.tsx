@@ -14,8 +14,8 @@ import { DivisionsSection } from "@/components/sections/DivisionsSection";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BrandStatementSection } from "@/components/sections/BrandStatementSection";
-// --- 🎨 1. استيراد المكون الجديد ---
 import { TeamSliderSection } from "@/components/sections/TeamSliderSection";
+import { ValuationPurposesSection } from "@/components/sections/ValuationPurposesSection";
 
 // DYNAMIC IMPORTS
 const ImageSwiper = dynamic(() => import("@/components/ui/image-swiper").then(mod => mod.ImageSwiper), { ssr: false, loading: () => <div className="w-full h-full min-h-[400px] bg-background-secondary rounded-lg animate-pulse" /> });
@@ -54,8 +54,8 @@ interface CeoData { ceoSectionTitle: string; ceoName: string; ceoMessage: string
 interface AboutData { aboutSectionTitle: string; aboutSectionContent: string; visionTitle: string; visionContent: string; missionTitle: string; missionContent: string; valuesTitle: string; valuesContent: string; vision2030Image: { node: ImageNode }; vision2030Title: string; vision2030Tagline: string; }
 interface ServicesSectionTitles { servicesMainTitle: string; servicesSubtitle: string; }
 interface DivisionsSectionTitles { divisionsMainTitle: string; divisionsSubtitle: string; }
-// --- 🎨 2. إضافة واجهة لبيانات قسم الفريق ---
 interface TeamSectionTitles { teamSectionTitle: string; teamSectionSubtitle: string; }
+interface PurposesSectionTitles { valuationPurposesTitle: string; }
 interface EquipmentSection { equipmentMainTitle: string; equipmentSubtitle: string; equipmentGallery: string; }
 interface QualityPolicySection { qualityTitle: string; qualityContent: string; qualityCommitments: string; }
 interface WhyUsSection { whyUsTitle: string; whyUsSubtitle: string; whyUsList: string; }
@@ -63,7 +63,6 @@ interface PortfolioSectionTitle { portfolioTitle: string; portfolioSubtitle: str
 interface Service { id: string; title: string; slug: string; serviceDetails: { serviceDescription: string; serviceImage: { node: ImageNode }; }; }
 interface Division { id: string; title: string; content: string; divisionDetails: { divisionIcon: string; }; }
 interface PortfolioItem { id: string; title: string; portfolioItemDetails: { commonText: string; binomialText: string; photo: { node: ImageNode; }; }; }
-// --- 🎨 3. إضافة واجهة لبيانات عضو الفريق ---
 interface TeamMember {
   id: string;
   title: string;
@@ -76,6 +75,15 @@ interface TeamMember {
       sourceUrl: string;
       altText: string;
     };
+  };
+}
+// --- تم التعديل هنا ---
+interface Purpose {
+  id: string;
+  title: string;
+  content: string; 
+  purposeDetails: {
+    iconPathSvgD: string; // <-- تم التعديل هنا
   };
 }
 interface ContactInfoData { contactSectionTitle: string; contactSectionSubtitle: string; emailAddress: string; phoneNumber: string; unifiedNumber: string; branchesAddress: string; qrCodeImage: { node: { sourceUrl: string; altText: string; } }; qrCodeText: string; }
@@ -99,6 +107,7 @@ interface AccreditationsSectionData {
   accreditationsGallery: string;
 }
 
+// --- تم تعديل هنا: اسم الحقل لـ `purposes` ---
 interface PageData {
   page: {
     homepageCeo: CeoData;
@@ -106,7 +115,8 @@ interface PageData {
     accreditationsSection: AccreditationsSectionData;
     servicesSectionTitles: ServicesSectionTitles;
     divisionsSectionTitles: DivisionsSectionTitles;
-    homepageTeamSection?: TeamSectionTitles; // 🎨 4. إضافة بيانات قسم الفريق للصفحة
+    homepageTeamSection?: TeamSectionTitles;
+    purposesSection?: PurposesSectionTitles; 
     equipmentSectionTitles: EquipmentSection;
     qualityPolicySection: QualityPolicySection;
     whyUsSection: WhyUsSection;
@@ -121,7 +131,8 @@ interface PageData {
   };
   services: { nodes: Service[] };
   divisions: { nodes: Division[] };
-  teamMembers: { nodes: TeamMember[] }; // 🎨 5. إضافة أعضاء الفريق للبيانات
+  teamMembers: { nodes: TeamMember[] };
+  purposes: { nodes: Purpose[] }; // <-- تم التعديل هنا
   portfolioItems: { nodes: PortfolioItem[] };
   headerMenu: Menu;
   footerMenu: Menu;
@@ -187,7 +198,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',
           body: JSON.stringify({
-            // --- 🎨 6. تعديل الاستعلام (Query) ---
+            // --- تم تعديل هنا: اسم الاستعلام `purposes` واسم الحقل `iconPathSvgD` ---
             query: `
                   query GetEverything(
                     $language: LanguageCodeFilterEnum!, 
@@ -202,7 +213,8 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       accreditationsSection { accreditationsTitle accreditationsSubtitle accreditationsGallery }
                       servicesSectionTitles { servicesMainTitle servicesSubtitle }
                       divisionsSectionTitles { divisionsMainTitle divisionsSubtitle }
-                      homepageTeamSection { teamSectionTitle teamSectionSubtitle } # <-- إضافة حقول عنوان القسم
+                      homepageTeamSection { teamSectionTitle teamSectionSubtitle }
+                      purposesSection { valuationPurposesTitle } 
                       equipmentSectionTitles { equipmentMainTitle equipmentSubtitle equipmentGallery }
                       qualityPolicySection { qualityTitle qualityContent qualityCommitments }
                       whyUsSection { whyUsTitle whyUsSubtitle whyUsList }
@@ -223,24 +235,26 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                     }
                     services(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) slug serviceDetails { serviceDescription serviceImage { node { sourceUrl altText } } } } }
                     divisions(first: 10, where: {language: $language}) { nodes { id title(format: RENDERED) content(format: RENDERED) divisionDetails { divisionIcon } } }
-                    # --- إضافة استعلام أعضاء الفريق ---
-                    teamMembers(first: 10, where: {language: $language}) {
+                    teamMembers(first: 10, where: {language: $language, orderby: {field: MENU_ORDER, order: ASC}}) {
                       nodes {
                         id
                         title(format: RENDERED)
-                        featuredImage {
-                          node {
-                            sourceUrl
-                            altText
-                          }
-                        }
-                        teamMemberDetails {
-                          designation
-                          description
+                        featuredImage { node { sourceUrl altText } }
+                        teamMemberDetails { designation description }
+                      }
+                    }
+                    # --- تم تعديل الاستعلام هنا ---
+                    purposes(first: 20, where: {language: $language, orderby: {field: MENU_ORDER, order: ASC}}) {
+                      nodes {
+                        id
+                        title(format: RENDERED)
+                        content(format: RENDERED)
+                        purposeDetails {
+                          iconPathSvgD # <-- تم التعديل هنا
                         }
                       }
                     }
-                    # ---------------------------------
+                    # -------------------------------
                     portfolioItems(first: 20, where: {language: $language}) { nodes { id title portfolioItemDetails { commonText binomialText photo { node { sourceUrl altText } } } } }
                     headerMenu: menu(id: $headerMenuName, idType: NAME) {
                       menuItems { nodes { id label url path } }
@@ -297,8 +311,8 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
     return <div className="min-h-screen bg-background text-text-primary flex justify-center items-center text-center p-4"><div><h2 className="text-red-500 text-2xl mb-4">خطأ في تحميل البيانات</h2><p>لم يتم العثور على القوائم. تأكد من تعيين القوائم لمواقعها الصحيحة في ووردبريس (Header Menu AR/EN و Footer Menu AR/EN).</p><p className="text-left text-sm bg-background-secondary p-4 rounded-md font-mono whitespace-pre-wrap">{error}</p></div></div>;
   }
 
-  // --- 🎨 7. سحب بيانات الفريق ---
-  const { page, services, divisions, teamMembers, portfolioItems, heroSlides, headerMenu, footerMenu } = pageData;
+  // --- تم تعديل هنا: اسم المتغير لـ `purposes` ---
+  const { page, services, divisions, teamMembers, purposes, portfolioItems, heroSlides, headerMenu, footerMenu } = pageData;
   const portfolioGalleryItems = portfolioItems.nodes.map((item: PortfolioItem) => ({ id: item.id, common: item.portfolioItemDetails.commonText, binomial: item.portfolioItemDetails.binomialText, photo: { url: item.portfolioItemDetails.photo.node.sourceUrl, text: item.portfolioItemDetails.photo.node.altText || item.title, pos: "center", by: "Makharez Team" } }));
   const equipmentImageUrls = parseImageUrlsFromHtml(page.equipmentSectionTitles.equipmentGallery);
   const whyUsListItems = page.whyUsSection.whyUsList.split('\n').filter(item => item.trim() !== '');
@@ -575,7 +589,6 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           subtitle={page.divisionsSectionTitles.divisionsSubtitle}
         />
 
-        {/* --- 🎨 8. إضافة المكون الجديد هنا --- */}
         <TeamSliderSection
           mainTitle={page.homepageTeamSection?.teamSectionTitle}
           subtitle={page.homepageTeamSection?.teamSectionSubtitle}
@@ -772,6 +785,14 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
             </motion.div>
           </div>
         </section>
+
+        {/* --- تم تعديل هنا: اسم المتغير لـ `purposes` --- */}
+        <ValuationPurposesSection
+          mainTitle={page.purposesSection?.valuationPurposesTitle}
+          purposes={purposes.nodes} // <-- تم التعديل هنا
+          centerLogoUrl={page.siteOptions.footerLogo.node.sourceUrl} // <-- استخدم لوجو الفوتر 
+          isRTL={isRTL}
+        />
 
         <AccreditationsSection
           title={page.accreditationsSection.accreditationsTitle}
