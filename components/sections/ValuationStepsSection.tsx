@@ -57,7 +57,6 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
 }) => {
   const displaySteps = steps.slice(0, 3);
   
-  // نبدأ دائماً من اليمين (آخر خطوة) في الاتجاهين
   const initialStep = displaySteps.length - 1;
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const [gradientPosition, setGradientPosition] = useState<{ x: number; y: number } | null>(null);
@@ -69,13 +68,12 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
     return null;
   }
 
-  // Auto-play animation - الحركة من اليمين للشمال في الاتجاهين
+  // Auto-play animation
   useEffect(() => {
     if (!autoPlay || displaySteps.length === 0) return;
 
     const intervalId = setInterval(() => {
       setCurrentStep((prev) => {
-        // الحركة من اليمين للشمال في الاتجاهين (2 → 1 → 0)
         const next = prev - 1;
         if (next < 0) {
           return loop ? displaySteps.length - 1 : prev;
@@ -87,14 +85,12 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
     return () => clearInterval(intervalId);
   }, [autoPlay, autoPlayDelay, loop, displaySteps.length]);
 
-  // Trigger callback when step changes
   useEffect(() => {
     if (onStepChange && displaySteps[currentStep]) {
       onStepChange(displaySteps[currentStep], currentStep);
     }
   }, [currentStep, displaySteps, onStepChange]);
 
-  // Update gradient position when step changes
   useEffect(() => {
     if (currentStep >= 0 && circleRefs.current[currentStep] && containerRef.current) {
       const circleElement = circleRefs.current[currentStep];
@@ -112,13 +108,11 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
     }
   }, [currentStep]);
 
-  // Handle manual step click
   const handleStepClick = (step: ValuationStep, index: number) => {
     setCurrentStep(index);
     onStepChange?.(step, index);
   };
 
-  // Create orbital dots animation
   const createOrbitalDots = (count: number, radius: number, color: string) => {
     const dots = [];
     for (let i = 0; i < count; i++) {
@@ -129,18 +123,18 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
       dots.push(
         <motion.div
           key={i}
-          className="absolute w-1.5 h-1.5 rounded-full"
+          className="absolute w-1 h-1 md:w-1.5 md:h-1.5 rounded-full"
           initial={{ 
             opacity: 0, 
             scale: 0.3,
-            x: x - 3,
-            y: y - 3
+            x: x - 2,
+            y: y - 2
           }}
           animate={{ 
             opacity: 1, 
             scale: 1,
-            x: x - 3,
-            y: y - 3
+            x: x - 2,
+            y: y - 2
           }}
           transition={{
             duration: shouldReduceMotion ? 0.2 : 0.6,
@@ -160,32 +154,26 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
     return dots;
   };
 
-  // تحديد إذا الخطوة منورة - من اليمين للشمال دائماً
   const isStepLit = (index: number) => {
-    // الخطوات المنورة هي الحالية وكل اللي على يمينها
     return index >= currentStep;
   };
 
-  // تحديد إذا الخط منور - الخط ينور لما نوصل للخطوة اللي على شماله
   const isLineLit = (lineIndex: number) => {
-    // lineIndex هو رقم الخط (0 للخط الأول، 1 للخط الثاني)
-    // الخط lineIndex يوصل بين الخطوة lineIndex والخطوة lineIndex+1
-    // الخط ينور لما نوصل للخطوة lineIndex أو أي خطوة على شمالها (أقل منها)
     return currentStep <= lineIndex;
   };
 
   return (
     <section 
       id="valuation-steps" 
-      className={cn("py-20 bg-background", className)}
+      className={cn("py-10 md:py-20 bg-background", className)}
     >
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         {mainTitle && (
-          <div className="text-center mb-16">
+          <div className="text-center mb-6 md:mb-16">
             <h2
               className={cn(
-                "text-3xl md:text-4xl font-bold text-gray-900",
+                "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900",
                 isRTL && "font-arabic"
               )}
             >
@@ -197,7 +185,7 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
         {/* Interactive Steps Container */}
         <div 
           ref={containerRef}
-          className="relative flex flex-col items-center gap-8 p-8 md:p-12 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100"
+          className="relative flex flex-col items-center gap-4 md:gap-8 p-4 sm:p-6 md:p-12 rounded-xl md:rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100"
         >
           {/* Radial gradient overlay */}
           {currentStep >= 0 && gradientPosition && (
@@ -208,14 +196,14 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
               style={{
-                background: `radial-gradient(circle at ${gradientPosition.x}px ${gradientPosition.y + 150}px, ${stepColors[currentStep].color}15 0%, ${stepColors[currentStep].color}08 40%, transparent 70%)`,
+                background: `radial-gradient(circle at ${gradientPosition.x}px ${gradientPosition.y + 80}px, ${stepColors[currentStep].color}15 0%, ${stepColors[currentStep].color}08 40%, transparent 70%)`,
               }}
             />
           )}
           
           {/* Steps Container */}
           <div className={cn(
-            "relative z-10 flex items-start gap-0",
+            "relative z-10 flex items-start gap-0 w-full justify-center",
             isRTL ? "flex-row-reverse" : "flex-row"
           )}>
             {displaySteps.map((step, index) => {
@@ -230,38 +218,42 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
                     isRTL ? "flex-row-reverse" : "flex-row"
                   )}
                 >
-                  {/* Step Column - الدائرة والنص */}
-                  <div className="flex flex-col items-center gap-6">
+                  {/* Step Column */}
+                  <div className="flex flex-col items-center gap-2 md:gap-6">
                     {/* Circle with Icon */}
                     <motion.div 
                       ref={(el) => { circleRefs.current[index] = el; }}
-                      className="relative cursor-pointer rounded-full flex items-center justify-center flex-shrink-0"
+                      className={cn(
+                        "relative cursor-pointer rounded-full flex items-center justify-center flex-shrink-0",
+                        "w-14 h-14",
+                        "sm:w-16 sm:h-16",
+                        "md:w-24 md:h-24",
+                        "lg:w-28 lg:h-28"
+                      )}
                       onClick={() => handleStepClick(step, index)}
                       animate={{
-                        width: isActive ? 120 : 100,
-                        height: isActive ? 120 : 100,
                         scale: isActive ? 1.05 : 1,
                         backgroundColor: isLit ? stepColors[index].color : '#f3f4f6',
                         borderColor: isLit ? stepColors[index].color : '#e5e7eb',
                         boxShadow: isActive 
-                          ? `0 0 30px ${stepColors[index].color}40, 0 10px 25px ${stepColors[index].color}20`
+                          ? `0 0 15px ${stepColors[index].color}40, 0 3px 10px ${stepColors[index].color}20`
                           : isLit 
-                          ? `0 5px 15px ${stepColors[index].color}30`
-                          : '0 2px 8px rgba(0,0,0,0.1)'
+                          ? `0 2px 8px ${stepColors[index].color}30`
+                          : '0 2px 6px rgba(0,0,0,0.1)'
                       }}
                       transition={{
                         duration: 0.4,
                         ease: "easeInOut"
                       }}
                       style={{
-                        border: '4px solid',
+                        border: '2px solid',
                       }}
                     >
                       {/* Icon SVG */}
                       <svg
                         viewBox="0 0 400 512"
                         xmlns="http://www.w3.org/2000/svg"
-                        className="w-14 h-14"
+                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-12 md:h-12 lg:w-14 lg:h-14"
                         style={{
                           fill: isLit ? 'white' : '#9ca3af',
                           transition: 'fill 0.3s ease-in-out'
@@ -271,21 +263,24 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
                         <path d={step.stepDetails?.iconPathSvgD || "M200 50 L350 450 L50 450 Z"} />
                       </svg>
                       
-                      {/* Orbital dots - النقاط الدائرية */}
-                      {isActive && createOrbitalDots(16, 70, stepColors[index].color)}
+                      {/* Orbital dots */}
+                      {isActive && createOrbitalDots(10, 32, stepColors[index].color)}
                     </motion.div>
 
-                    {/* Label - النص */}
+                    {/* Label */}
                     <motion.span 
                       className={cn(
-                        "font-bold cursor-pointer text-center whitespace-nowrap",
+                        "font-bold cursor-pointer text-center px-1",
                         isRTL && "font-arabic"
                       )}
+                      style={{
+                        whiteSpace: 'nowrap',
+                        fontSize: isActive ? 'clamp(0.75rem, 2.5vw, 1.5rem)' : 'clamp(0.65rem, 2vw, 1.125rem)'
+                      }}
                       onClick={() => handleStepClick(step, index)}
                       animate={{
-                        fontSize: isActive ? '1.5rem' : '1.125rem',
                         color: isLit ? stepColors[index].color : '#9ca3af',
-                        textShadow: isActive ? `0 2px 10px ${stepColors[index].color}30` : 'none'
+                        textShadow: isActive ? `0 1px 5px ${stepColors[index].color}30` : 'none'
                       }}
                       transition={{
                         duration: 0.3,
@@ -296,10 +291,10 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
                     </motion.span>
                   </div>
                   
-                  {/* Connecting Line - الخط الواصل */}
+                  {/* Connecting Line */}
                   {index < displaySteps.length - 1 && (
                     <motion.div 
-                      className="h-1 w-32 md:w-56 mx-6 md:mx-8 mt-12 rounded-full flex-shrink-0"
+                      className="h-0.5 md:h-1 w-12 sm:w-16 md:w-40 lg:w-56 mx-2 sm:mx-3 md:mx-6 lg:mx-8 mt-6 sm:mt-8 md:mt-12 rounded-full flex-shrink-0"
                       animate={{
                         background: isLineLit(index)
                           ? `linear-gradient(${isRTL ? 'to left' : 'to right'}, ${stepColors[index].gradientFrom}, ${stepColors[index + 1].gradientTo})`
