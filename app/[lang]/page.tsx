@@ -16,6 +16,8 @@ import { Footer } from "@/components/layout/Footer";
 import { BrandStatementSection } from "@/components/sections/BrandStatementSection";
 import { TeamSliderSection } from "@/components/sections/TeamSliderSection";
 import { ValuationPurposesSection } from "@/components/sections/ValuationPurposesSection";
+// --- 🎨 تمت الإضافة هنا ---
+import { ValuationStepsSection } from "@/components/sections/ValuationStepsSection";
 
 // DYNAMIC IMPORTS
 const ImageSwiper = dynamic(() => import("@/components/ui/image-swiper").then(mod => mod.ImageSwiper), { ssr: false, loading: () => <div className="w-full h-full min-h-[400px] bg-background-secondary rounded-lg animate-pulse" /> });
@@ -56,6 +58,10 @@ interface ServicesSectionTitles { servicesMainTitle: string; servicesSubtitle: s
 interface DivisionsSectionTitles { divisionsMainTitle: string; divisionsSubtitle: string; }
 interface TeamSectionTitles { teamSectionTitle: string; teamSectionSubtitle: string; }
 interface PurposesSectionTitles { valuationPurposesTitle: string; }
+// --- 🎨 تمت الإضافة هنا ---
+interface ValuationStepsSectionTitles {
+  stepsSectionTitle: string;
+}
 interface EquipmentSection { equipmentMainTitle: string; equipmentSubtitle: string; equipmentGallery: string; }
 interface QualityPolicySection { qualityTitle: string; qualityContent: string; qualityCommitments: string; }
 interface WhyUsSection { whyUsTitle: string; whyUsSubtitle: string; whyUsList: string; }
@@ -77,13 +83,20 @@ interface TeamMember {
     };
   };
 }
-// --- تم التعديل هنا ---
 interface Purpose {
   id: string;
   title: string;
   content: string; 
   purposeDetails: {
-    iconPathSvgD: string; // <-- تم التعديل هنا
+    iconPathSvgD: string;
+  };
+}
+// --- 🎨 تمت الإضافة هنا ---
+interface ValuationStep {
+  id: string;
+  title: string;
+  stepDetails: {
+    iconPathSvgD: string;
   };
 }
 interface ContactInfoData { contactSectionTitle: string; contactSectionSubtitle: string; emailAddress: string; phoneNumber: string; unifiedNumber: string; branchesAddress: string; qrCodeImage: { node: { sourceUrl: string; altText: string; } }; qrCodeText: string; }
@@ -107,7 +120,7 @@ interface AccreditationsSectionData {
   accreditationsGallery: string;
 }
 
-// --- تم تعديل هنا: اسم الحقل لـ `purposes` ---
+// --- 🎨 تم التعديل هنا ---
 interface PageData {
   page: {
     homepageCeo: CeoData;
@@ -116,7 +129,8 @@ interface PageData {
     servicesSectionTitles: ServicesSectionTitles;
     divisionsSectionTitles: DivisionsSectionTitles;
     homepageTeamSection?: TeamSectionTitles;
-    purposesSection?: PurposesSectionTitles; 
+    purposesSection?: PurposesSectionTitles;
+    stepsSection?: ValuationStepsSectionTitles; // <-- تمت الإضافة
     equipmentSectionTitles: EquipmentSection;
     qualityPolicySection: QualityPolicySection;
     whyUsSection: WhyUsSection;
@@ -132,7 +146,8 @@ interface PageData {
   services: { nodes: Service[] };
   divisions: { nodes: Division[] };
   teamMembers: { nodes: TeamMember[] };
-  purposes: { nodes: Purpose[] }; // <-- تم التعديل هنا
+  purposes: { nodes: Purpose[] };
+  valuationSteps: { nodes: ValuationStep[] }; // <-- تمت الإضافة
   portfolioItems: { nodes: PortfolioItem[] };
   headerMenu: Menu;
   footerMenu: Menu;
@@ -198,7 +213,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',
           body: JSON.stringify({
-            // --- تم تعديل هنا: اسم الاستعلام `purposes` واسم الحقل `iconPathSvgD` ---
+            // --- 🎨 تم التعديل هنا ---
             query: `
                   query GetEverything(
                     $language: LanguageCodeFilterEnum!, 
@@ -215,6 +230,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       divisionsSectionTitles { divisionsMainTitle divisionsSubtitle }
                       homepageTeamSection { teamSectionTitle teamSectionSubtitle }
                       purposesSection { valuationPurposesTitle } 
+                      stepsSection { stepsSectionTitle } # <-- تمت الإضافة
                       equipmentSectionTitles { equipmentMainTitle equipmentSubtitle equipmentGallery }
                       qualityPolicySection { qualityTitle qualityContent qualityCommitments }
                       whyUsSection { whyUsTitle whyUsSubtitle whyUsList }
@@ -243,14 +259,23 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                         teamMemberDetails { designation description }
                       }
                     }
-                    # --- تم تعديل الاستعلام هنا ---
                     purposes(first: 20, where: {language: $language, orderby: {field: MENU_ORDER, order: ASC}}) {
                       nodes {
                         id
                         title(format: RENDERED)
                         content(format: RENDERED)
                         purposeDetails {
-                          iconPathSvgD # <-- تم التعديل هنا
+                          iconPathSvgD
+                        }
+                      }
+                    }
+                    # --- 🎨 تمت الإضافة هنا ---
+                    valuationSteps(first: 3, where: {language: $language, orderby: {field: MENU_ORDER, order: ASC}}) {
+                      nodes {
+                        id
+                        title(format: RENDERED)
+                        stepDetails {
+                          iconPathSvgD
                         }
                       }
                     }
@@ -311,8 +336,8 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
     return <div className="min-h-screen bg-background text-text-primary flex justify-center items-center text-center p-4"><div><h2 className="text-red-500 text-2xl mb-4">خطأ في تحميل البيانات</h2><p>لم يتم العثور على القوائم. تأكد من تعيين القوائم لمواقعها الصحيحة في ووردبريس (Header Menu AR/EN و Footer Menu AR/EN).</p><p className="text-left text-sm bg-background-secondary p-4 rounded-md font-mono whitespace-pre-wrap">{error}</p></div></div>;
   }
 
-  // --- تم تعديل هنا: اسم المتغير لـ `purposes` ---
-  const { page, services, divisions, teamMembers, purposes, portfolioItems, heroSlides, headerMenu, footerMenu } = pageData;
+  // --- 🎨 تم التعديل هنا ---
+  const { page, services, divisions, teamMembers, purposes, valuationSteps, portfolioItems, heroSlides, headerMenu, footerMenu } = pageData;
   const portfolioGalleryItems = portfolioItems.nodes.map((item: PortfolioItem) => ({ id: item.id, common: item.portfolioItemDetails.commonText, binomial: item.portfolioItemDetails.binomialText, photo: { url: item.portfolioItemDetails.photo.node.sourceUrl, text: item.portfolioItemDetails.photo.node.altText || item.title, pos: "center", by: "Makharez Team" } }));
   const equipmentImageUrls = parseImageUrlsFromHtml(page.equipmentSectionTitles.equipmentGallery);
   const whyUsListItems = page.whyUsSection.whyUsList.split('\n').filter(item => item.trim() !== '');
@@ -786,13 +811,20 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
           </div>
         </section>
 
-        {/* --- تم تعديل هنا: اسم المتغير لـ `purposes` --- */}
         <ValuationPurposesSection
           mainTitle={page.purposesSection?.valuationPurposesTitle}
-          purposes={purposes.nodes} // <-- تم التعديل هنا
-          centerLogoUrl={page.siteOptions.footerLogo.node.sourceUrl} // <-- استخدم لوجو الفوتر 
+          purposes={purposes.nodes}
+          centerLogoUrl={page.siteOptions.footerLogo.node.sourceUrl}
           isRTL={isRTL}
         />
+
+        {/* --- 🎨 تمت الإضافة هنا --- */}
+        <ValuationStepsSection
+          mainTitle={page.stepsSection?.stepsSectionTitle}
+          steps={valuationSteps.nodes}
+          isRTL={isRTL}
+        />
+        {/* ------------------------ */}
 
         <AccreditationsSection
           title={page.accreditationsSection.accreditationsTitle}
