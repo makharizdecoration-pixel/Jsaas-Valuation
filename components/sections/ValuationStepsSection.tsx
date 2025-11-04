@@ -1,17 +1,15 @@
 // components/sections/ValuationStepsSection.tsx
-
 "use client";
-
-import { useState, useRef, useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-// --- Interfaces ---
 interface ValuationStep {
   id: string;
   title: string;
   stepDetails: {
     iconPathSvgD: string;
+    // --- 🎨 تم حذف السطر الخاص بـ iconViewBox بناءً على طلبك ---
   };
 }
 
@@ -26,24 +24,46 @@ interface ValuationStepsSectionProps {
   onStepChange?: (step: ValuationStep, index: number) => void;
 }
 
-// الألوان المتدرجة لكل خطوة
-const stepColors = [
-  {
-    color: "#3b82f6",
-    gradientFrom: "#3b82f6",
-    gradientTo: "#60a5fa",
-  },
-  {
-    color: "#8b5cf6",
-    gradientFrom: "#8b5cf6",
-    gradientTo: "#a855f7",
-  },
-  {
-    color: "#ec4899",
-    gradientFrom: "#a855f7",
-    gradientTo: "#ec4899",
+// --- 🎨 تمت إضافة هذه الدالة ---
+/**
+ * يستخلص بيانات الـ path من داخل d="..."
+ * @param pathString النص القادم من الووردبريس
+ * @returns بيانات الـ path النظيفة
+ */
+const extractPathData = (pathString: string): string => {
+  if (!pathString) return "";
+  
+  // يبحث عن d="..." أو d='...'
+  const match = pathString.match(/d=(["'])(.*?)\1/);
+  
+  // إذا وجد d="..."، يرجع ما بداخلها
+  if (match && match[2]) {
+    return match[2];
   }
-];
+  
+  // إذا لم يجد (ربما أدخل المستخدم المسار مباشرة)
+  // سيفترض أن النص المدخل هو المسار الصحيح
+  // ويقوم بإزالة أي مسافات بيضاء زائدة
+  return pathString.trim();
+};
+// ------------------------------
+
+function getGridColumns(count: number, isMobile: boolean) {
+  // للموبايل: ٣ فوق و٢ تحت
+  if (isMobile && count === 5) return "repeat(3, 1fr)";
+  if (!isMobile && count <= 6) return `repeat(${count}, 1fr)`;
+  return `repeat(${Math.ceil(count / (isMobile ? 2 : 2))}, 1fr)`;
+}
+function getGridRow(idx: number, stepsLength: number, isMobile: boolean) {
+  // للموبايل: ٣ فوق و٢ تحت
+  if (isMobile && stepsLength === 5) return idx < 3 ? 1 : 2;
+  return undefined;
+}
+function getJustifySelf(idx: number, stepsLength: number, isMobile: boolean) {
+  // وسط كل صف في الموبايل فقط
+  if (isMobile && stepsLength === 5) return "center";
+  return undefined;
+}
 
 export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
   mainTitle,
@@ -51,129 +71,55 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
   isRTL,
   className,
   autoPlay = true,
-  autoPlayDelay = 3,
+  autoPlayDelay = 1.1,
   loop = true,
   onStepChange,
 }) => {
-  const displaySteps = steps.slice(0, 3);
-  
-  const initialStep = displaySteps.length - 1;
-  const [currentStep, setCurrentStep] = useState<number>(initialStep);
-  const [gradientPosition, setGradientPosition] = useState<{ x: number; y: number } | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const circleRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const shouldReduceMotion = useReducedMotion();
+  const [circleSize, setCircleSize] = useState(60);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  if (!displaySteps || displaySteps.length === 0) {
-    return null;
-  }
-
-  // Auto-play animation
   useEffect(() => {
-    if (!autoPlay || displaySteps.length === 0) return;
+    function handleResize() {
+      setIsMobile(window.innerWidth < 700);
+      const min = 32, max = 60;
+      const count = Math.max(steps.length, 1);
+      const width = typeof window !== "undefined" ? Math.min(window.innerWidth - 60, 1100) : 900;
+      const size = count <= 4
+        ? max
+        : Math.max(min, Math.min(max, Math.floor((width - (count - 1) * 32) / count)));
+      setCircleSize(size);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [steps.length]);
 
-    const intervalId = setInterval(() => {
-      setCurrentStep((prev) => {
-        const next = prev - 1;
-        if (next < 0) {
-          return loop ? displaySteps.length - 1 : prev;
-        }
-        return next;
-      });
+  useEffect(() => {
+    if (!autoPlay || steps.length === 0) return;
+    if (currentStep > steps.length && !loop) return;
+    const timeout = setTimeout(() => {
+      setCurrentStep((prev) => (prev < steps.length ? prev + 1 : loop ? 1 : prev));
     }, autoPlayDelay * 1000);
-
-    return () => clearInterval(intervalId);
-  }, [autoPlay, autoPlayDelay, loop, displaySteps.length]);
-
-  useEffect(() => {
-    if (onStepChange && displaySteps[currentStep]) {
-      onStepChange(displaySteps[currentStep], currentStep);
-    }
-  }, [currentStep, displaySteps, onStepChange]);
+    return () => clearTimeout(timeout);
+  }, [autoPlay, autoPlayDelay, loop, steps.length, currentStep]);
 
   useEffect(() => {
-    if (currentStep >= 0 && circleRefs.current[currentStep] && containerRef.current) {
-      const circleElement = circleRefs.current[currentStep];
-      const containerElement = containerRef.current;
-      
-      const circleRect = circleElement.getBoundingClientRect();
-      const containerRect = containerElement.getBoundingClientRect();
-      
-      const relativeX = circleRect.left + (circleRect.width / 2) - containerRect.left;
-      const relativeY = circleRect.top + (circleRect.height / 2) - containerRect.top;
-      
-      setGradientPosition({ x: relativeX, y: relativeY });
-    } else {
-      setGradientPosition(null);
+    if (onStepChange && steps[Math.min(currentStep, steps.length - 1)]) {
+      onStepChange(steps[Math.min(currentStep, steps.length - 1)], Math.min(currentStep, steps.length - 1));
     }
-  }, [currentStep]);
+  }, [currentStep, steps, onStepChange]);
 
-  const handleStepClick = (step: ValuationStep, index: number) => {
-    setCurrentStep(index);
-    onStepChange?.(step, index);
-  };
-
-  const createOrbitalDots = (count: number, radius: number, color: string) => {
-    const dots = [];
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * 2 * Math.PI;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
-      
-      dots.push(
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 md:w-1.5 md:h-1.5 rounded-full"
-          initial={{ 
-            opacity: 0, 
-            scale: 0.3,
-            x: x - 2,
-            y: y - 2
-          }}
-          animate={{ 
-            opacity: 1, 
-            scale: 1,
-            x: x - 2,
-            y: y - 2
-          }}
-          transition={{
-            duration: shouldReduceMotion ? 0.2 : 0.6,
-            delay: shouldReduceMotion ? 0 : i * 0.05,
-            type: "spring",
-            stiffness: 300,
-            damping: 20,
-          }}
-          style={{
-            backgroundColor: color,
-            left: '50%',
-            top: '50%',
-          }}
-        />
-      );
-    }
-    return dots;
-  };
-
-  const isStepLit = (index: number) => {
-    return index >= currentStep;
-  };
-
-  const isLineLit = (lineIndex: number) => {
-    return currentStep <= lineIndex;
-  };
+  if (!steps || steps.length === 0) return null;
 
   return (
-    <section 
-      id="valuation-steps" 
-      className={cn("py-10 md:py-20 bg-background", className)}
-    >
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Section Title */}
+    <section className={cn("py-10 md:py-20 bg-background select-none", className)}>
+      <div className="container mx-auto max-w-7xl px-2 sm:px-7">
         {mainTitle && (
-          <div className="text-center mb-6 md:mb-16">
+          <div className="text-center mb-7 md:mb-10">
             <h2
               className={cn(
-                "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900",
+                "text-xl md:text-3xl font-bold text-gray-900",
                 isRTL && "font-arabic"
               )}
             >
@@ -182,131 +128,149 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
           </div>
         )}
 
-        {/* Interactive Steps Container */}
-        <div 
-          ref={containerRef}
-          className="relative flex flex-col items-center gap-4 md:gap-8 p-4 sm:p-6 md:p-12 rounded-xl md:rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100"
+        <div
+          style={{
+            minHeight: steps.length > 6 || isMobile ? circleSize * 8 : circleSize * 4.7,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "linear-gradient(to bottom right, #f6f7fa, #fff)",
+            borderRadius: "1rem",
+            boxShadow: "0 8px 24px #0001",
+            width: "100%",
+            padding: "40px 18px",
+          }}
         >
-          {/* Radial gradient overlay */}
-          {currentStep >= 0 && gradientPosition && (
-            <motion.div 
-              className="absolute inset-0 pointer-events-none z-0"
-              key={`gradient-${currentStep}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                background: `radial-gradient(circle at ${gradientPosition.x}px ${gradientPosition.y + 80}px, ${stepColors[currentStep].color}15 0%, ${stepColors[currentStep].color}08 40%, transparent 70%)`,
-              }}
-            />
-          )}
-          
-          {/* Steps Container */}
-          <div className={cn(
-            "relative z-10 flex items-start gap-0 w-full justify-center",
-            isRTL ? "flex-row-reverse" : "flex-row"
-          )}>
-            {displaySteps.map((step, index) => {
-              const isActive = index === currentStep;
-              const isLit = isStepLit(index);
+          <div
+            className="grid items-start justify-items-center w-full"
+            style={{
+              gridTemplateColumns: getGridColumns(steps.length, isMobile),
+              gridTemplateRows: isMobile ? "repeat(2, 1fr)" : steps.length > 6 ? "repeat(2, 1fr)" : "repeat(1, 1fr)",
+              width: "100%",
+              gap: "0px",
+            }}
+          >
+            {steps.map((step, idx) => {
+              // --- 🎨 تم التعديل هنا ---
+              // نقوم بتنظيف البيانات القادمة من الووردبريس
+              const cleanPathData = extractPathData(step.stepDetails.iconPathSvgD);
+              // ------------------------
 
               return (
-                <div 
-                  key={step.id} 
-                  className={cn(
-                    "flex items-start gap-0",
-                    isRTL ? "flex-row-reverse" : "flex-row"
-                  )}
+                <div
+                  key={step.id}
+                  style={{
+                    gridRow: getGridRow(idx, steps.length, isMobile),
+                    justifySelf: getJustifySelf(idx, steps.length, isMobile),
+                    minWidth: 0,
+                    position: "relative"
+                  }}
+                  className="flex flex-col items-center justify-start w-full"
                 >
-                  {/* Step Column */}
-                  <div className="flex flex-col items-center gap-2 md:gap-6">
-                    {/* Circle with Icon */}
-                    <motion.div 
-                      ref={(el) => { circleRefs.current[index] = el; }}
-                      className={cn(
-                        "relative cursor-pointer rounded-full flex items-center justify-center flex-shrink-0",
-                        "w-14 h-14",
-                        "sm:w-16 sm:h-16",
-                        "md:w-24 md:h-24",
-                        "lg:w-28 lg:h-28"
-                      )}
-                      onClick={() => handleStepClick(step, index)}
-                      animate={{
-                        scale: isActive ? 1.05 : 1,
-                        backgroundColor: isLit ? stepColors[index].color : '#f3f4f6',
-                        borderColor: isLit ? stepColors[index].color : '#e5e7eb',
-                        boxShadow: isActive 
-                          ? `0 0 15px ${stepColors[index].color}40, 0 3px 10px ${stepColors[index].color}20`
-                          : isLit 
-                          ? `0 2px 8px ${stepColors[index].color}30`
-                          : '0 2px 6px rgba(0,0,0,0.1)'
-                      }}
-                      transition={{
-                        duration: 0.4,
-                        ease: "easeInOut"
-                      }}
+                  {/* الخط الفاصل */}
+                  {idx > 0 && (!isMobile || (isMobile && idx !== 3)) && (
+                    <span
+                      aria-hidden
                       style={{
-                        border: '2px solid',
-                      }}
-                    >
-                      {/* Icon SVG */}
-                      <svg
-                        viewBox="0 0 400 512"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-12 md:h-12 lg:w-14 lg:h-14"
-                        style={{
-                          fill: isLit ? 'white' : '#9ca3af',
-                          transition: 'fill 0.3s ease-in-out'
-                        }}
-                        aria-hidden="true"
-                      >
-                        <path d={step.stepDetails?.iconPathSvgD || "M200 50 L350 450 L50 450 Z"} />
-                      </svg>
-                      
-                      {/* Orbital dots */}
-                      {isActive && createOrbitalDots(10, 32, stepColors[index].color)}
-                    </motion.div>
-
-                    {/* Label */}
-                    <motion.span 
-                      className={cn(
-                        "font-bold cursor-pointer text-center px-1",
-                        isRTL && "font-arabic"
-                      )}
-                      style={{
-                        whiteSpace: 'nowrap',
-                        fontSize: isActive ? 'clamp(0.75rem, 2.5vw, 1.5rem)' : 'clamp(0.65rem, 2vw, 1.125rem)'
-                      }}
-                      onClick={() => handleStepClick(step, index)}
-                      animate={{
-                        color: isLit ? stepColors[index].color : '#9ca3af',
-                        textShadow: isActive ? `0 1px 5px ${stepColors[index].color}30` : 'none'
-                      }}
-                      transition={{
-                        duration: 0.3,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      {step.title}
-                    </motion.span>
-                  </div>
-                  
-                  {/* Connecting Line */}
-                  {index < displaySteps.length - 1 && (
-                    <motion.div 
-                      className="h-0.5 md:h-1 w-12 sm:w-16 md:w-40 lg:w-56 mx-2 sm:mx-3 md:mx-6 lg:mx-8 mt-6 sm:mt-8 md:mt-12 rounded-full flex-shrink-0"
-                      animate={{
-                        background: isLineLit(index)
-                          ? `linear-gradient(${isRTL ? 'to left' : 'to right'}, ${stepColors[index].gradientFrom}, ${stepColors[index + 1].gradientTo})`
-                          : '#e5e7eb',
-                        opacity: isLineLit(index) ? 1 : 0.5
-                      }}
-                      transition={{
-                        duration: 0.5,
-                        ease: "easeInOut"
+                        position: "absolute",
+                        left: isRTL ? undefined : isMobile ? `-26px` : `-${circleSize * 0.22}px`,
+                        right: isRTL ? isMobile ? `-26px` : `-${circleSize * 0.22}px` : undefined,
+                        top: "53%",
+                        transform: "translateY(-50%)",
+                        height: 3,
+                        width: isMobile ? "34px" : "34px",
+                        minWidth: 10,
+                        maxWidth: 40,
+                        borderRadius: 3,
+                        zIndex: 1,
+                        background: idx <= currentStep - 1 ? "#09c" : "#e3e3e3",
+                        opacity: idx <= currentStep - 1 ? 1 : 0.31,
+                        transition: "background .3s, opacity .3s",
                       }}
                     />
                   )}
+
+                  <motion.div
+                    className={cn(
+                      "rounded-full flex items-center justify-center border-2 shadow-lg cursor-pointer transition-all",
+                      idx <= currentStep - 1
+                        ? "bg-accent border-accent"
+                        : "bg-background-secondary border-background-secondary"
+                    )}
+                    animate={{
+                      scale: idx === currentStep ? 1.11 : 1,
+                      boxShadow:
+                        idx === currentStep ? `0 0 30px var(--accent)33` : undefined,
+                    }}
+                    style={{
+                      width: circleSize,
+                      height: circleSize,
+                      minWidth: circleSize,
+                      minHeight: circleSize,
+                      marginBottom: 10,
+                      zIndex: 2,
+                    }}
+                    onClick={() => setCurrentStep(idx + 1)}
+                  >
+                    {cleanPathData && (
+                      <svg
+                        // --- 🎨 المقاس الثابت (مشكلة التشويه) باقية كما هي بناءً على طلبك ---
+                        viewBox="0 0 400 512" 
+                        width={circleSize * 0.47}
+                        height={circleSize * 0.47}
+                        className={
+                          idx <= currentStep - 1 ? "text-accent-text" : "text-primary"
+                        }
+                        fill="currentColor"
+                        style={{
+                          display: "block",
+                          transition: "color .33s, fill .33s",
+                        }}
+                      >
+                        {/* --- 🎨 تم التعديل هنا --- */}
+                        <path d={cleanPathData} fill="currentColor" />
+                      </svg>
+                    )}
+                  </motion.div>
+                  
+                  {/* مربع النص */}
+                  <div
+                    style={{
+                      minHeight: 68,
+                      maxHeight: 68,
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <span
+                      className={cn(
+                        "text-center select-none transition-colors",
+                        idx <= currentStep - 1 ? "text-accent" : "text-primary"
+                      )}
+                      style={{
+                        fontWeight: "400",
+                        fontSize:
+                          isMobile
+                            ? ".78rem"
+                            : typeof window !== "undefined" && window.innerWidth < 1024
+                            ? ".91rem"
+                            : circleSize < 54
+                            ? ".98rem"
+                            : "1.11rem",
+                        maxWidth: circleSize * 2.1,
+                        whiteSpace: "normal",
+                        lineHeight: 1.18,
+                        width: "100%",
+                        height: "100%",
+                        display: "block",
+                        marginTop: 5,
+                      }}
+                    >
+                      {step.title}
+                    </span>
+                  </div>
                 </div>
               );
             })}

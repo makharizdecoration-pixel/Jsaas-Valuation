@@ -270,7 +270,7 @@ export default function Home({ params }: { params: { lang: 'ar' | 'en' } }) {
                       }
                     }
                     # --- 🎨 تمت الإضافة هنا ---
-                    valuationSteps(first: 3, where: {language: $language, orderby: {field: MENU_ORDER, order: ASC}}) {
+                    valuationSteps(first: 20, where: {language: $language, orderby: {field: MENU_ORDER, order: ASC}}) {
                       nodes {
                         id
                         title(format: RENDERED)
