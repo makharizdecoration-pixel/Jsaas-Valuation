@@ -147,7 +147,8 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
               gridTemplateColumns: getGridColumns(steps.length, isMobile),
               gridTemplateRows: isMobile ? "repeat(2, 1fr)" : steps.length > 6 ? "repeat(2, 1fr)" : "repeat(1, 1fr)",
               width: "100%",
-              gap: "0px",
+              // --- 🎨 تم التعديل هنا لإضافة مسافة رأسية بين الصفوف ---
+              rowGap: "40px",
             }}
           >
             {steps.map((step, idx) => {
@@ -167,28 +168,8 @@ export const ValuationStepsSection: React.FC<ValuationStepsSectionProps> = ({
                   }}
                   className="flex flex-col items-center justify-start w-full"
                 >
-                  {/* الخط الفاصل */}
-                  {idx > 0 && (!isMobile || (isMobile && idx !== 3)) && (
-                    <span
-                      aria-hidden
-                      style={{
-                        position: "absolute",
-                        left: isRTL ? undefined : isMobile ? `-26px` : `-${circleSize * 0.22}px`,
-                        right: isRTL ? isMobile ? `-26px` : `-${circleSize * 0.22}px` : undefined,
-                        top: "53%",
-                        transform: "translateY(-50%)",
-                        height: 3,
-                        width: isMobile ? "34px" : "34px",
-                        minWidth: 10,
-                        maxWidth: 40,
-                        borderRadius: 3,
-                        zIndex: 1,
-                        background: idx <= currentStep - 1 ? "#09c" : "#e3e3e3",
-                        opacity: idx <= currentStep - 1 ? 1 : 0.31,
-                        transition: "background .3s, opacity .3s",
-                      }}
-                    />
-                  )}
+                  
+                  {/* --- 🎨 تم حذف الخط الفاصل من هنا --- */}
 
                   <motion.div
                     className={cn(
