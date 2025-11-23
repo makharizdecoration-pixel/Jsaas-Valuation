@@ -1,7 +1,7 @@
 // components/sections/ValuationPurposesSection.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { X, Zap, ArrowRight } from "lucide-react";
 
@@ -52,8 +52,10 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
   const [iconSvgSize, setIconSvgSize] = useState(ICON_SVG_SIZE);
   const [centerLogoSize, setCenterLogoSize] = useState(CENTER_LOGO_SIZE);
   const [isMobile, setIsMobile] = useState(false);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
+  const requestRef = useRef<number>(); // مرجع لحفظ الـ Animation Frame
 
   const numItems = purposes.length;
 
@@ -72,25 +74,29 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
     return () => window.removeEventListener("resize", updateSizes);
   }, []);
 
-  // --- Auto-rotation ---
+  // --- Optimized Auto-rotation using requestAnimationFrame ---
+  const animate = useCallback(() => {
+    setRotationAngle((prevAngle) => {
+      // زيادة ناعمة جداً في الزاوية (0.15 بدل 0.3) لحركة أكثر انسيابية
+      return (prevAngle + 0.15) % 360;
+    });
+    requestRef.current = requestAnimationFrame(animate);
+  }, []);
+
   useEffect(() => {
-    let rotationTimer: NodeJS.Timeout;
-
     if (autoRotate) {
-      rotationTimer = setInterval(() => {
-        setRotationAngle((prev) => {
-          const newAngle = (prev + 0.3) % 360;
-          return Number(newAngle.toFixed(3));
-        });
-      }, 50);
+      requestRef.current = requestAnimationFrame(animate);
+    } else {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+      }
     }
-
     return () => {
-      if (rotationTimer) {
-        clearInterval(rotationTimer);
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [autoRotate]);
+  }, [autoRotate, animate]);
 
   // --- Calculate Position ---
   const calculateNodePosition = (index: number) => {
@@ -163,13 +169,11 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
 
   if (!purposes || purposes.length === 0) return null;
 
-  // Helper to find the expanded item
   const expandedPurpose = purposes.find((p) => p.id === expandedItemId);
   const expandedIndex = purposes.findIndex((p) => p.id === expandedItemId);
 
   return (
     <>
-      {/* Custom Scrollbar Styles */}
       <style dangerouslySetInnerHTML={{__html: `
         .purposes-card-scroll::-webkit-scrollbar {
           width: 6px;
@@ -281,7 +285,7 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
               return (
                 <div
                   key={item.id}
-                  className="absolute transition-all duration-700 cursor-pointer"
+                  className="absolute transition-transform duration-0 cursor-pointer will-change-transform" // Removed duration for smooth rAF
                   style={{
                     transform: `translate(${position.x}px, ${position.y}px)`,
                     zIndex: isExpanded ? 200 : position.zIndex,
@@ -353,34 +357,27 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
               );
             })}
 
-            {/* =======================================================
-              🔥 DESKTOP CARD: FINAL SAFARI FIX
-              Rendered as a direct Sibling, no 0-width containers.
-              Calculated directly with 'calc' for rock-solid positioning.
-              =======================================================
-            */}
+            {/* DESKTOP CARD */}
             {expandedItemId && !isMobile && expandedPurpose && expandedIndex !== -1 && (() => {
                const pos = calculateNodePosition(expandedIndex);
                const verticalOffset = iconSize / 2 + 15; 
                
-               // تحديد إزاحة الكارد بدقة ليكون في المنتصف أفقياً بالنسبة للأيقونة
                const cardLeft = `calc(50% + ${pos.x}px)`;
                const cardTop = pos.isInUpperHalf 
                  ? `calc(50% + ${pos.y}px + ${verticalOffset}px)`
                  : `calc(50% + ${pos.y}px - ${verticalOffset}px)`;
 
-               // تحديد مكان الخط الواصل
                const lineStyle = pos.isInUpperHalf 
                  ? { top: '-15px', height: '15px' }
                  : { bottom: '-15px', height: '15px' };
                  
                const cardTransform = pos.isInUpperHalf
-                 ? "translateX(-50%)" // الكارد يبدأ من نقطة الاتصال وينزل لتحت
-                 : "translateX(-50%) translateY(-100%)"; // الكارد يطلع لفوق
+                 ? "translateX(-50%)"
+                 : "translateX(-50%) translateY(-100%)";
 
                return (
                  <div
-                    className="absolute z-[500] bg-background/98 backdrop-blur-xl border-2 border-accent/60 rounded-xl shadow-2xl w-80 flex flex-col"
+                    className="absolute z-[500] bg-background/98 backdrop-blur-xl border-2 border-accent/60 rounded-xl shadow-2xl w-80 flex flex-col transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-2"
                     style={{
                       left: cardLeft,
                       top: cardTop,
@@ -389,7 +386,6 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
                     }}
                     onClick={(e) => e.stopPropagation()}
                  >
-                     {/* Connecting Line */}
                      <div 
                        className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-accent/60 z-20"
                        style={lineStyle}
@@ -408,7 +404,7 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
                             {expandedPurpose.status === "completed" ? "مكتمل" : expandedPurpose.status === "in-progress" ? "قيد التنفيذ" : "معلق"}
                           </div>
                         )}
-                        <button onClick={handleCloseCard} className="text-text-secondary hover:text-accent p-1.5 rounded-full hover:bg-accent/10">
+                        <button onClick={handleCloseCard} className="text-text-secondary hover:text-accent p-1.5 rounded-full hover:bg-accent/10 transition-colors">
                           <X size={20} />
                         </button>
                       </div>
@@ -469,17 +465,14 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
         </div>
       </section>
 
-      {/* =======================================================
-        🔥 MOBILE CARD: FIXED OVERLAY (No changes, already works)
-        =======================================================
-      */}
+      {/* MOBILE CARD */}
       {expandedItemId && isMobile && expandedPurpose && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
           onClick={handleCloseCard}
         >
           <div 
-            className="w-full max-w-md bg-background/95 backdrop-blur-xl border-2 border-accent/60 rounded-2xl shadow-2xl flex flex-col animate-in fade-in zoom-in duration-200"
+            className="w-full max-w-md bg-background/95 backdrop-blur-xl border-2 border-accent/60 rounded-2xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300"
             style={{ maxHeight: "80vh" }}
             onClick={(e) => e.stopPropagation()}
           >
