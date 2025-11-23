@@ -163,7 +163,9 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
 
   if (!purposes || purposes.length === 0) return null;
 
+  // Helper to find the expanded item
   const expandedPurpose = purposes.find((p) => p.id === expandedItemId);
+  const expandedIndex = purposes.findIndex((p) => p.id === expandedItemId);
 
   return (
     <>
@@ -276,14 +278,6 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
               const isPulsing = pulseEffect[item.id];
               const energy = item.energy || 0;
 
-              const cardPosition = position.isInUpperHalf 
-                ? { top: `${iconSize + 8}px` }
-                : { bottom: `${iconSize + 8}px` };
-
-              const linePosition = position.isInUpperHalf
-                ? { top: `-8px` }
-                : { bottom: `-8px` };
-
               return (
                 <div
                   key={item.id}
@@ -355,182 +349,210 @@ export const ValuationPurposesSection: React.FC<ValuationPurposesSectionProps> =
                   >
                     {item.title}
                   </div>
-
-                  {/* Card للديسكتوب فقط */}
-                  {isExpanded && !isMobile && (
-                    <div
-                      className="absolute bg-background/98 backdrop-blur-xl border-2 border-accent/60 rounded-xl shadow-2xl w-80 flex flex-col"
-                      style={{
-                        ...cardPosition,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        maxHeight: "400px",
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div 
-                        className="absolute left-1/2 -translate-x-1/2 w-0.5 h-8 bg-accent/60 z-20"
-                        style={linePosition}
-                      ></div>
-
-                      <div 
-                        className="purposes-card-scroll flex-1 overflow-y-auto p-6"
-                        style={{
-                          scrollbarWidth: "thin",
-                          scrollbarColor: "rgb(99, 102, 241) rgba(99, 102, 241, 0.1)",
-                        }}
-                      >
-                        <div className="flex justify-between items-center mb-3">
-                          {item.status && (
-                            <div className={cn("px-3 py-1.5 text-xs font-bold rounded-full border", getStatusStyles(item.status))}>
-                              {item.status === "completed" ? "مكتمل" : item.status === "in-progress" ? "قيد التنفيذ" : "معلق"}
-                            </div>
-                          )}
-                          <button onClick={handleCloseCard} className="text-text-secondary hover:text-accent p-1.5 rounded-full hover:bg-accent/10">
-                            <X size={20} />
-                          </button>
-                        </div>
-
-                        <h3 className={`text-xl font-bold text-text-primary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}>
-                          {item.title}
-                        </h3>
-
-                        <div className={`text-sm leading-relaxed text-text-secondary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}
-                          dangerouslySetInnerHTML={{ __html: item.content || "" }}
-                        />
-
-                        {item.energy !== undefined && (
-                          <div className="pt-3 border-t border-border/40">
-                            <div className="flex justify-between items-center text-sm mb-2">
-                              <span className="flex items-center text-text-secondary font-medium">
-                                <Zap size={14} className={isRTL ? "ml-1.5" : "mr-1.5"} />
-                                مستوى الطاقة
-                              </span>
-                              <span className="font-mono font-bold text-accent">{item.energy}%</span>
-                            </div>
-                            <div className="w-full h-2.5 bg-border/40 rounded-full overflow-hidden">
-                              <div className="h-full bg-gradient-to-r from-accent to-accent-hover rounded-full"
-                                style={{ width: `${item.energy}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        )}
-
-                        {item.relatedIds && item.relatedIds.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-border/40">
-                            <h4 className="text-sm font-bold text-text-secondary mb-2 flex items-center">
-                              <ArrowRight size={14} className={isRTL ? "ml-1.5 rotate-180" : "mr-1.5"} />
-                              عناصر مرتبطة
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              {item.relatedIds.map((relatedId) => {
-                                const relatedItem = purposes.find(p => p.id === relatedId);
-                                if (!relatedItem) return null;
-                                return (
-                                  <button key={relatedId}
-                                    className="text-xs px-3 py-2 rounded-lg border border-accent/40 bg-accent/5 hover:bg-accent/15 hover:border-accent text-text-primary hover:text-accent transition-all font-semibold"
-                                    onClick={(e) => { e.stopPropagation(); handleItemClick(relatedId, e); }}
-                                  >
-                                    {relatedItem.title}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
 
-            {/* Card للموبايل - في منتصف الدائرة */}
-            {expandedItemId && isMobile && expandedPurpose && (
-              <div 
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[250] pointer-events-auto"
-                style={{
-                  width: "90vw",
-                  maxWidth: "400px",
-                }}
-              >
-                <div 
-                  className="bg-background/98 backdrop-blur-xl border-2 border-accent/60 rounded-2xl shadow-2xl flex flex-col"
-                  style={{ maxHeight: "65vh" }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div 
-                    className="purposes-card-scroll flex-1 overflow-y-auto p-5"
+            {/* =======================================================
+              🔥 DESKTOP CARD: FINAL SAFARI FIX
+              Rendered as a direct Sibling, no 0-width containers.
+              Calculated directly with 'calc' for rock-solid positioning.
+              =======================================================
+            */}
+            {expandedItemId && !isMobile && expandedPurpose && expandedIndex !== -1 && (() => {
+               const pos = calculateNodePosition(expandedIndex);
+               const verticalOffset = iconSize / 2 + 15; 
+               
+               // تحديد إزاحة الكارد بدقة ليكون في المنتصف أفقياً بالنسبة للأيقونة
+               const cardLeft = `calc(50% + ${pos.x}px)`;
+               const cardTop = pos.isInUpperHalf 
+                 ? `calc(50% + ${pos.y}px + ${verticalOffset}px)`
+                 : `calc(50% + ${pos.y}px - ${verticalOffset}px)`;
+
+               // تحديد مكان الخط الواصل
+               const lineStyle = pos.isInUpperHalf 
+                 ? { top: '-15px', height: '15px' }
+                 : { bottom: '-15px', height: '15px' };
+                 
+               const cardTransform = pos.isInUpperHalf
+                 ? "translateX(-50%)" // الكارد يبدأ من نقطة الاتصال وينزل لتحت
+                 : "translateX(-50%) translateY(-100%)"; // الكارد يطلع لفوق
+
+               return (
+                 <div
+                    className="absolute z-[500] bg-background/98 backdrop-blur-xl border-2 border-accent/60 rounded-xl shadow-2xl w-80 flex flex-col"
                     style={{
-                      scrollbarWidth: "thin",
-                      scrollbarColor: "rgb(99, 102, 241) rgba(99, 102, 241, 0.1)",
+                      left: cardLeft,
+                      top: cardTop,
+                      transform: cardTransform,
+                      maxHeight: "400px",
                     }}
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      {expandedPurpose.status && (
-                        <div className={cn("px-3 py-1.5 text-xs font-bold rounded-full border", getStatusStyles(expandedPurpose.status))}>
-                          {expandedPurpose.status === "completed" ? "مكتمل" : expandedPurpose.status === "in-progress" ? "قيد التنفيذ" : "معلق"}
+                    onClick={(e) => e.stopPropagation()}
+                 >
+                     {/* Connecting Line */}
+                     <div 
+                       className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-accent/60 z-20"
+                       style={lineStyle}
+                     ></div>
+
+                    <div 
+                      className="purposes-card-scroll flex-1 overflow-y-auto p-6"
+                      style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "rgb(99, 102, 241) rgba(99, 102, 241, 0.1)",
+                      }}
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        {expandedPurpose.status && (
+                          <div className={cn("px-3 py-1.5 text-xs font-bold rounded-full border", getStatusStyles(expandedPurpose.status))}>
+                            {expandedPurpose.status === "completed" ? "مكتمل" : expandedPurpose.status === "in-progress" ? "قيد التنفيذ" : "معلق"}
+                          </div>
+                        )}
+                        <button onClick={handleCloseCard} className="text-text-secondary hover:text-accent p-1.5 rounded-full hover:bg-accent/10">
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      <h3 className={`text-xl font-bold text-text-primary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}>
+                        {expandedPurpose.title}
+                      </h3>
+
+                      <div className={`text-sm leading-relaxed text-text-secondary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}
+                        dangerouslySetInnerHTML={{ __html: expandedPurpose.content || "" }}
+                      />
+
+                      {expandedPurpose.energy !== undefined && (
+                        <div className="pt-3 border-t border-border/40">
+                          <div className="flex justify-between items-center text-sm mb-2">
+                            <span className="flex items-center text-text-secondary font-medium">
+                              <Zap size={14} className={isRTL ? "ml-1.5" : "mr-1.5"} />
+                              مستوى الطاقة
+                            </span>
+                            <span className="font-mono font-bold text-accent">{expandedPurpose.energy}%</span>
+                          </div>
+                          <div className="w-full h-2.5 bg-border/40 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-accent to-accent-hover rounded-full"
+                              style={{ width: `${expandedPurpose.energy}%` }}
+                            ></div>
+                          </div>
                         </div>
                       )}
-                      <button onClick={handleCloseCard} className="text-text-secondary hover:text-accent p-2 rounded-full hover:bg-accent/10 transition-all">
-                        <X size={20} />
-                      </button>
+
+                      {expandedPurpose.relatedIds && expandedPurpose.relatedIds.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-border/40">
+                          <h4 className="text-sm font-bold text-text-secondary mb-2 flex items-center">
+                            <ArrowRight size={14} className={isRTL ? "ml-1.5 rotate-180" : "mr-1.5"} />
+                            عناصر مرتبطة
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {expandedPurpose.relatedIds.map((relatedId) => {
+                              const relatedItem = purposes.find(p => p.id === relatedId);
+                              if (!relatedItem) return null;
+                              return (
+                                <button key={relatedId}
+                                  className="text-xs px-3 py-2 rounded-lg border border-accent/40 bg-accent/5 hover:bg-accent/15 hover:border-accent text-text-primary hover:text-accent transition-all font-semibold"
+                                  onClick={(e) => { e.stopPropagation(); handleItemClick(relatedId, e); }}
+                                >
+                                  {relatedItem.title}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
+                 </div>
+               );
+            })()}
 
-                    <h3 className={`text-xl font-bold text-text-primary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}>
-                      {expandedPurpose.title}
-                    </h3>
-
-                    <div className={`text-sm leading-relaxed text-text-secondary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}
-                      dangerouslySetInnerHTML={{ __html: expandedPurpose.content || "" }}
-                    />
-
-                    {expandedPurpose.energy !== undefined && (
-                      <div className="pt-3 border-t border-border/40">
-                        <div className="flex justify-between items-center text-sm mb-2">
-                          <span className="flex items-center text-text-secondary font-medium">
-                            <Zap size={14} className={isRTL ? "ml-1.5" : "mr-1.5"} />
-                            مستوى الطاقة
-                          </span>
-                          <span className="font-mono font-bold text-accent">{expandedPurpose.energy}%</span>
-                        </div>
-                        <div className="w-full h-2.5 bg-border/40 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-accent to-accent-hover rounded-full"
-                            style={{ width: `${expandedPurpose.energy}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-
-                    {expandedPurpose.relatedIds && expandedPurpose.relatedIds.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-border/40">
-                        <h4 className="text-sm font-bold text-text-secondary mb-2 flex items-center">
-                          <ArrowRight size={14} className={isRTL ? "ml-1.5 rotate-180" : "mr-1.5"} />
-                          عناصر مرتبطة
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {expandedPurpose.relatedIds.map((relatedId) => {
-                            const relatedItem = purposes.find(p => p.id === relatedId);
-                            if (!relatedItem) return null;
-                            return (
-                              <button key={relatedId}
-                                className="text-xs px-3 py-2 rounded-lg border border-accent/40 bg-accent/5 hover:bg-accent/15 hover:border-accent text-text-primary hover:text-accent transition-all font-semibold"
-                                onClick={(e) => { e.stopPropagation(); handleItemClick(relatedId, e); }}
-                              >
-                                {relatedItem.title}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
+
+      {/* =======================================================
+        🔥 MOBILE CARD: FIXED OVERLAY (No changes, already works)
+        =======================================================
+      */}
+      {expandedItemId && isMobile && expandedPurpose && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm"
+          onClick={handleCloseCard}
+        >
+          <div 
+            className="w-full max-w-md bg-background/95 backdrop-blur-xl border-2 border-accent/60 rounded-2xl shadow-2xl flex flex-col animate-in fade-in zoom-in duration-200"
+            style={{ maxHeight: "80vh" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div 
+              className="purposes-card-scroll flex-1 overflow-y-auto p-5"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgb(99, 102, 241) rgba(99, 102, 241, 0.1)",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                {expandedPurpose.status && (
+                  <div className={cn("px-3 py-1.5 text-xs font-bold rounded-full border", getStatusStyles(expandedPurpose.status))}>
+                    {expandedPurpose.status === "completed" ? "مكتمل" : expandedPurpose.status === "in-progress" ? "قيد التنفيذ" : "معلق"}
+                  </div>
+                )}
+                <button onClick={handleCloseCard} className="text-text-secondary hover:text-accent p-2 rounded-full hover:bg-accent/10 transition-all">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <h3 className={`text-xl font-bold text-text-primary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}>
+                {expandedPurpose.title}
+              </h3>
+
+              <div className={`text-sm leading-relaxed text-text-secondary mb-3 ${isRTL ? "font-arabic text-right" : "text-left"}`}
+                dangerouslySetInnerHTML={{ __html: expandedPurpose.content || "" }}
+              />
+
+              {expandedPurpose.energy !== undefined && (
+                <div className="pt-3 border-t border-border/40">
+                  <div className="flex justify-between items-center text-sm mb-2">
+                    <span className="flex items-center text-text-secondary font-medium">
+                      <Zap size={14} className={isRTL ? "ml-1.5" : "mr-1.5"} />
+                      مستوى الطاقة
+                    </span>
+                    <span className="font-mono font-bold text-accent">{expandedPurpose.energy}%</span>
+                  </div>
+                  <div className="w-full h-2.5 bg-border/40 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-accent to-accent-hover rounded-full"
+                      style={{ width: `${expandedPurpose.energy}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              {expandedPurpose.relatedIds && expandedPurpose.relatedIds.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-border/40">
+                  <h4 className="text-sm font-bold text-text-secondary mb-2 flex items-center">
+                    <ArrowRight size={14} className={isRTL ? "ml-1.5 rotate-180" : "mr-1.5"} />
+                    عناصر مرتبطة
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {expandedPurpose.relatedIds.map((relatedId) => {
+                      const relatedItem = purposes.find(p => p.id === relatedId);
+                      if (!relatedItem) return null;
+                      return (
+                        <button key={relatedId}
+                          className="text-xs px-3 py-2 rounded-lg border border-accent/40 bg-accent/5 hover:bg-accent/15 hover:border-accent text-text-primary hover:text-accent transition-all font-semibold"
+                          onClick={(e) => { e.stopPropagation(); handleItemClick(relatedId, e); }}
+                        >
+                          {relatedItem.title}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
